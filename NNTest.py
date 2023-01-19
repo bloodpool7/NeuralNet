@@ -15,25 +15,30 @@ weights = np.array([[-0.4, -0.7, 0.9, 1.1], # neuron 1
 
 bias = [[0.2, 0.3, -0.4]]
 
-output = np.dot(inputs, weights) + bias
-output = np.maximum(0, output)
+z = np.dot(inputs, weights) + bias
+output = np.maximum(0, z)
 
+drelu = np.ones(z.shape)
+
+drelu[z <= 0] = 0
 
 #backward
 y = np.array([])
-n = 50
+n = 10
 for i in range(n):
-    dvalue = np.maximum(0, 2 * output - 2 * target)
+    drelu = np.ones(z.shape)
+    drelu[z <= 0] = 0
+    dvalue = np.multiply(2 * output - 2 * target, drelu)
 
     dweights = np.dot(inputs.T, dvalue)
     dinputs = np.dot(dvalue, weights.T)
     dbias = np.sum(dvalue, axis = 0, keepdims = True)
 
-    weights -= 0.01 * dweights
-    bias -= 0.01 * dbias
+    weights -= 0.1 * dweights
+    bias -= 0.1 * dbias
 
-    output = np.dot(inputs, weights) + bias
-    output = np.maximum(0, output)
+    z = np.dot(inputs, weights) + bias
+    output = np.maximum(0, z)
     y = np.append(y, np.mean((output - target) ** 2))
 
 
