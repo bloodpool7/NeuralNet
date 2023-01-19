@@ -20,6 +20,7 @@ output = np.maximum(0, z)
 
 drelu = np.ones(z.shape)
 
+
 drelu[z <= 0] = 0
 
 #backward
