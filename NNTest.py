@@ -43,12 +43,13 @@ for i in range(n):
     y = np.append(y, np.mean((output - target) ** 2))
 
 
-print(output)
+
 cost = (output - target) ** 2
+print(np.mean(cost))
 
 x = range(n)
 
-fig, ax = plt.subplots()
-ax.plot(x, y)
-plt.show()
+# fig, ax = plt.subplots()
+# ax.plot(x, y)
+# plt.show()
 

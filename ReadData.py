@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 f = open("train-images-idx3-ubyte", "rb")
 x = f.read()
@@ -18,4 +19,3 @@ for i in range(length):
         index += 1
     inputs.append(input)
 
-print(inputs[0:2])

@@ -5,33 +5,6 @@ import time
 
 nnfs.init()
 
-# |A| - matrix A is an input matrix which as the shape (batch amount, number of features)
-# | 3 2 1 |
-# | 4 2 3 |
-# | 4 1 2 |
-inputs = [[3, 2, 1, 4, 3],
-          [4, 2, 3, 2, 1],
-          [4, 1, 2, 3, 1]]
-# |B| - matrix B is a weight matrix which has shape (number of neurons, number of inputs)
-# | 2 4 1 |
-# | 2 1 3 |
-# | 3 2 1 |
-weights = [[2, 4, 1, 2, 4],
-           [2, 1, 3, 3, 2],
-           [3, 2, 1, 1, 3],
-           [3, 2, 1, 1, 3]]
-# we want to do |A| * |B| such that the features are being multiplied by the number of inputs
-# therefore, it is sensical to make it so that |B| is actually shaped (number of inputs, number of neurons) 
-
-bias = [3, 2, 1, 4] # bias is a list because there are 3 neurons
-
-# print(np.array(inputs))
-# print(np.array(weights).T)
-
-# output = np.dot(inputs, np.array(weights).T) + bias
-
-# print(output)
-
 class Layer_Dense:
     #parameters are the number of neurons by the number of features
     def __init__(self, n_inputs, n_neurons):
@@ -56,10 +29,13 @@ class Layer_Dense:
 class Activation_ReLU:
     #the inputs are meant to be the output of a forward pass of a dense layer
     def forward(self, inputs):
+        self.inputs = inputs
         self.outputs = np.maximum(0, inputs)
     
     def backward(self, dvalues):
-        self.drelu = np.maximum(dvalues, 0)
+        self.dinputs = dvalues.copy()
+        
+        self.dinputs[self.inputs <= 0] = 0
 
 
 class Activation_Softmax:
@@ -77,6 +53,8 @@ class Loss:
 
 class CategoricalCrossEntroy(Loss):
     def forward(self, y_pred, y_target):
+        self.inputs = np.array(y_pred)
+        self.targets = y_target
 
         y_target = np.array(y_target)
 
@@ -92,54 +70,35 @@ class CategoricalCrossEntroy(Loss):
 
 class Mean_Squared_Error(Loss):
     def forward(self, y_pred, y_target):
+        self.inputs = y_pred
+
         y_target = np.array(y_target)
-
-        y_pred_clipped = np.clip(y_pred, 1e-7, 1e7)
-
         if (len(y_target.shape) == 1):
-            correct_confidences = y_pred_clipped[range(len(y_pred_clipped)), y_target]
+            self.targets = np.zeros_like(y_pred)
+            self.targets[range(len(y_pred)), y_target] = 1
         else:
-            correct_confidences = np.sum(y_pred_clipped * y_target, axis = 1)
-        
-        total_loss = (correct_confidences - 1)**2
+            self.targets = y_target
+
+        total_loss = (y_pred - self.targets) ** 2
+            
         return total_loss
 
+    def backward(self):
+        self.dinputs = (2 * self.inputs - 2 * self.targets)
 
-# X, y = spiral_data(samples = 100, classes = 3)
 
-# layer1 = Layer_Dense(2, 10)
+outputs = np.array([[0.3, 0.2, 0.3], [0.7, 0.2, 0.9]])
+targets = [1, 2]
 
-# layer2 = Layer_Dense(10, 3)
+loss_function = Mean_Squared_Error()
 
-# activation1 = Activation_ReLU()
+loss = loss_function.forward(outputs, targets)
 
-# activation2 = Activation_Softmax()
+print(loss)
 
-# layer1.forward(X)
-
-# activation1.forward(layer1.outputs)
-
-# layer2.forward(activation1.outputs)
-
-# activation2.forward(layer2.outputs)
-
-# loss_function = CategoricalCrossEntroy()
-
-# loss = loss_function.calculate(activation2.outputs, y)
-
-# predictions = np.argmax(activation2.outputs, axis = 1)
-
-# class_targets = np.argmax(y, axis = 1) if len(y.shape) == 2 else y
-
-# # turns every element of numpy array into 2 decimal points
-# print(np.array([list((float("{:.2f}".format(y)) for y in x)) for x in activation2.outputs[:5] ])) 
-
-# print("acc: " + "{:.2f}".format(np.mean(predictions == class_targets)))
-
-# print("loss: " + "{:.2f}".format(loss))
-
+'''
 # Create dataset
-X, y = vertical_data(samples=1000, classes=3)
+X, y = vertical_data(samples=10, classes=3)
 # Create model
 dense1 = Layer_Dense(2, 3)  # first dense layer, 2 inputs
 activation1 = Activation_ReLU()
@@ -188,5 +147,7 @@ for iteration in range(3000):
         dense1.bias = best_dense1_biases.copy()
         dense2.weights = best_dense2_weights.copy()
         dense2.bias = best_dense2_biases.copy()
+
 print(f"best loss = {lowest_loss}")
 print(f"time taken = {time.time() - start} seconds")
+'''
