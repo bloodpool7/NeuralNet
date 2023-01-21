@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 target = np.array([[1, 0, 0],
                    [0, 0, 1]])
 
-inputs = np.array([[0.3, 0.2, 1.7, 0.5],
+inputs = np.array([[0.4, 0.3, 0.8, 0.1],
                    [0.7, 0.4, -0.2, 0.3]])
 weights = np.array([[-0.4, -0.7, 0.9, 1.1], # neuron 1
                    [-0.7, -0.6, 0.8, 0.4], # neuron 2
@@ -29,14 +29,14 @@ n = 10
 for i in range(n):
     drelu = np.ones(z.shape)
     drelu[z <= 0] = 0
-    dvalue = np.multiply(2 * output - 2 * target, drelu)
+    dvalue = np.multiply((2 * output - 2 * target)/len(output), drelu)
 
     dweights = np.dot(inputs.T, dvalue)
     dinputs = np.dot(dvalue, weights.T)
     dbias = np.sum(dvalue, axis = 0, keepdims = True)
 
-    weights -= 0.1 * dweights
-    bias -= 0.1 * dbias
+    weights -= 0.5 * dweights
+    bias -= 0.5 * dbias
 
     z = np.dot(inputs, weights) + bias
     output = np.maximum(0, z)
@@ -49,7 +49,7 @@ print(np.mean(cost))
 
 x = range(n)
 
-# fig, ax = plt.subplots()
-# ax.plot(x, y)
-# plt.show()
+fig, ax = plt.subplots()
+ax.plot(x, y)
+plt.show()
 

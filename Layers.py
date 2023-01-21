@@ -54,19 +54,22 @@ class Loss:
 class CategoricalCrossEntroy(Loss):
     def forward(self, y_pred, y_target):
         self.inputs = np.array(y_pred)
-        self.targets = y_target
 
         y_target = np.array(y_target)
+        if (len(y_target.shape) == 1):
+            self.targets = np.zeros_like(y_pred)
+            self.targets[range(len(y_pred)), y_target] = 1
+        else:
+            self.targets = y_target
 
         y_pred_clipped = np.clip(y_pred, 1e-7, 1-1e-7)
 
-        if (len(y_target.shape) == 1):
-            correct_confidences = y_pred_clipped[range(len(y_pred_clipped)), y_target]
-        elif (len(y_target.shape) == 2):
-            correct_confidences = np.sum(y_pred_clipped * y_target, axis = 1)
-
+        correct_confidences = np.sum(y_pred_clipped * self.targets, axis = 1)
         total_loss = -np.log(correct_confidences)
         return total_loss
+    
+    def backward(self, outputs, labels):
+        pass
 
 class Mean_Squared_Error(Loss):
     def forward(self, y_pred, y_target):
@@ -83,8 +86,8 @@ class Mean_Squared_Error(Loss):
             
         return total_loss
 
-    def backward(self):
-        self.dinputs = (2 * self.inputs - 2 * self.targets)
+    def backward(self, outputs, labels):
+        self.dinputs = np.copy((2 * outputs - 2 * labels)/len(outputs))
 
 
 outputs = np.array([[0.3, 0.2, 0.3], [0.7, 0.2, 0.9]])
