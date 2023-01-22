@@ -4,10 +4,24 @@ import matplotlib.pyplot as plt
 #forward layer of 3 neurons
 
 target = np.array([[1, 0, 0],
+                   [0, 0, 1],
+                   [1, 0, 0],
+                   [0, 0, 1],
+                   [0, 1, 0],
+                   [1, 0, 0],
+                   [0, 1, 0],
+                   [0, 1, 0],
                    [0, 0, 1]])
 
 inputs = np.array([[0.4, 0.3, 0.8, 0.1],
-                   [0.7, 0.4, -0.2, 0.3]])
+                   [0.7, 0.4, -0.2, 0.3],
+                   [0.8, 0.4, -0.22, 0.4],
+                   [0.5, 0.3, -0.4, 0.6],
+                   [0.1, -0.3, 0.2, 0.7],
+                   [0.4, 0.9, 0.9, -0.3],
+                   [0.2, 0.7, 0.3, 0.2],
+                   [0.1, -0.6, -0.2, 0.3],
+                   [0.1, 0.2, -0.5, 0.98]])
 weights = np.array([[-0.4, -0.7, 0.9, 1.1], # neuron 1
                    [-0.7, -0.6, 0.8, 0.4], # neuron 2
                    [0.9, 0.7, 0.7, 0.1]]).T  # neuron 3
@@ -25,7 +39,7 @@ drelu[z <= 0] = 0
 
 #backward
 y = np.array([])
-n = 10
+n = 100
 for i in range(n):
     drelu = np.ones(z.shape)
     drelu[z <= 0] = 0
@@ -43,7 +57,7 @@ for i in range(n):
     y = np.append(y, np.mean((output - target) ** 2))
 
 
-
+print(output)
 cost = (output - target) ** 2
 print(np.mean(cost))
 

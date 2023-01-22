@@ -11,47 +11,59 @@ class Layer_Dense:
         self.weights = 0.5 * np.random.randn(n_inputs, n_neurons)
         self.bias = np.zeros(shape = (1, n_neurons))
 
+    #setting the weights
     def set_weight(self, weight_in):
         self.weights = weight_in
 
+    #setting the biases
     def set_bias(self, bias_in):
         self.bias = bias_in
 
+    #the forward pass of a layer (dot product basically)
     def forward(self, inputs):
         self.inputs = inputs
         self.outputs =  np.dot(inputs, self.weights) + self.bias
     
+    #the backward pass of a layer (calculating gradient)
     def backward(self, dvalues):
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dinputs = np.dot(dvalues, self.weights.T)
         self.dbias = np.sum(dvalues, axis = 0, keepdims = True)
 
+#The relu activation function
 class Activation_ReLU:
     #the inputs are meant to be the output of a forward pass of a dense layer
+    #calculates the ReLU of the inputs
     def forward(self, inputs):
         self.inputs = inputs
         self.outputs = np.maximum(0, inputs)
     
+    #calculates the gradient of the ReLU function with respect to its inputs
     def backward(self, dvalues):
         self.dinputs = dvalues.copy()
         
         self.dinputs[self.inputs <= 0] = 0
 
-
+#The softmax activation function
 class Activation_Softmax:
     #the inputs are meant to be the output of a hidden layer typically using a ReLU activation function
+    #The forward pass of a softmax function (exponentiation and normalization)
     def forward(self, inputs):
         exp_inputs = np.exp(inputs - np.max(inputs, axis = 1, keepdims = True))
         probabilities = exp_inputs / np.sum(exp_inputs, axis = 1, keepdims = True)
         self.outputs = probabilities
 
+#A common loss class 
 class Loss:
+    #calculates the given loss function and returns its average
     def calculate(self, outputs, y):
         sample_loss = self.forward(outputs, y)
         data_loss = np.mean(sample_loss)
         return data_loss
 
+#Categorical Cross Entropy Loss
 class CategoricalCrossEntroy(Loss):
+    #The forward pass (-log of the inputs)
     def forward(self, y_pred, y_target):
         self.inputs = np.array(y_pred)
 
@@ -68,10 +80,21 @@ class CategoricalCrossEntroy(Loss):
         total_loss = -np.log(correct_confidences)
         return total_loss
     
+    #The backwards pass (targets / predicted) and then normalized
     def backward(self, outputs, labels):
-        pass
+        samples = len(outputs)
 
+        labels = np.array(labels)
+        if (len(labels.shape) == 1):
+            labels = np.eye(len(outputs[0]))[labels]
+        
+        self.dinputs = -labels/outputs 
+
+        self.dinputs /= samples
+
+#The mean squared error class 
 class Mean_Squared_Error(Loss):
+    #The forward pass, outputs - inputs squared
     def forward(self, y_pred, y_target):
         self.inputs = y_pred
 
@@ -86,9 +109,12 @@ class Mean_Squared_Error(Loss):
             
         return total_loss
 
+    #The backward pass, calculating the normalized gradient
     def backward(self, outputs, labels):
         self.dinputs = np.copy((2 * outputs - 2 * labels)/len(outputs))
 
+
+#=================================================TESTING===============================================
 
 outputs = np.array([[0.3, 0.2, 0.3], [0.7, 0.2, 0.9]])
 targets = [1, 2]
