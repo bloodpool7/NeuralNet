@@ -66,7 +66,7 @@ class Activation_Softmax:
 
             jacobian = np.diagflat(single_output) - np.dot(single_output.T, single_output)
             
-            self.dinputs[i] = np.dot(jacobian, dvalues)
+            self.dinputs[i] = np.dot(jacobian, single_dvalue)
 
 #A common loss class 
 class Loss:
