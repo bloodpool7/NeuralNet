@@ -53,6 +53,21 @@ class Activation_Softmax:
         probabilities = exp_inputs / np.sum(exp_inputs, axis = 1, keepdims = True)
         self.outputs = probabilities
 
+    #Derivative of softmax produces Jacobian matrix. (Each output is influenced by all inputs)
+    #I will use S to denote the output of the softmax and kd to denote the kronecker delta
+    #Derivative = Si,j*kdj,k - Si,j*Si,j
+    #i is the sample number
+    #j is the output we are taking the derivative of
+    #k is the input we are taking the derivative in respect to
+    def backward(self, dvalues):
+        self.dinputs = np.empty_like(dvalues)
+        for i,(single_output, single_dvalue) in enumerate(zip(self.outputs, dvalues)):
+            single_output = np.reshape(single_output, (1,-1))
+
+            jacobian = np.diagflat(single_output) - np.dot(single_output.T, single_output)
+            
+            self.dinputs[i] = np.dot(jacobian, dvalues)
+
 #A common loss class 
 class Loss:
     #calculates the given loss function and returns its average
@@ -113,17 +128,16 @@ class Mean_Squared_Error(Loss):
     def backward(self, outputs, labels):
         self.dinputs = np.copy((2 * outputs - 2 * labels)/len(outputs))
 
+#=================================================TESTING===============================================#
 
-#=================================================TESTING===============================================
+outputs = [[0.7, 0.1, 0.2]]
 
-outputs = np.array([[0.3, 0.2, 0.3], [0.7, 0.2, 0.9]])
-targets = [1, 2]
+activation = Activation_Softmax()
+lossfunction = CategoricalCrossEntroy()
 
-loss_function = Mean_Squared_Error()
-
-loss = loss_function.forward(outputs, targets)
-
-print(loss)
+activation.forward(outputs)
+lossfunction.backward(activation.outputs, [2, 1])
+activation.backward(lossfunction.dinputs)
 
 '''
 # Create dataset
