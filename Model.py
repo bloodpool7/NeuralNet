@@ -326,8 +326,9 @@ class Model:
         self.__optimizer.post_param_updates()
 
     
-    def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None):
-        pass 
+    def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None, epochs = None):
+        if (len(X_train.shape) == 3):
+            pass
 
     def predict(self, X, y = None) -> np.ndarray:
         self.__forward(X, y)
