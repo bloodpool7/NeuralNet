@@ -154,9 +154,19 @@ class Softmax_Entropy:
         self.dinputs /= samples
 
 class Optimizer_SGD:
-    def __init__(self, learning_rate = 1.0):
+    def __init__(self, learning_rate = 1.0, decay = 0):
         self.learning_rate = learning_rate
+        self.current_learning_rate = learning_rate
+        self.decay = decay
+        self.iterations = 0
     
+    def pre_update_params(self):
+        if self.decay:
+            self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
+
     def update_params(self, layer: Layer_Dense):
-        layer.weights -= self.learning_rate * layer.dweights
-        layer.bias -= self.learning_rate * layer.dbias
+        layer.weights -= self.current_learning_rate * layer.dweights
+        layer.bias -= self.current_learning_rate * layer.dbias
+
+    def post_update_params(self):
+        self.iterations += 1

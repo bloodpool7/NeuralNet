@@ -14,7 +14,7 @@ layer2 = Layer_Dense(64, 3)
 activation1 = Activation_ReLU()
 loss_activation2 = Softmax_Entropy()
 
-optimizer = Optimizer_SGD(learning_rate = 0.85)
+optimizer = Optimizer_SGD(learning_rate = 1.1, decay = 0.001)
 
 
 for epoch in range(10001):
@@ -40,8 +40,10 @@ for epoch in range(10001):
     activation1.backward(layer2.dinputs)
     layer1.backward(activation1.dinputs)
 
+    optimizer.pre_update_params()
     optimizer.update_params(layer1)
     optimizer.update_params(layer2)
+    optimizer.post_update_params()
 
 
 
