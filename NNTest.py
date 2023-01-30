@@ -3,6 +3,7 @@ import nnfs
 from nnfs.datasets import spiral_data
 import matplotlib.pyplot as plt
 from Model import *
+from ReadData import *
 
 nnfs.init()
 
@@ -14,8 +15,7 @@ layer2 = Layer_Dense(64, 3)
 activation1 = Activation_ReLU()
 loss_activation2 = Softmax_Entropy()
 
-optimizer = Optimizer_SGD(learning_rate = 1.1, decay = 0.001)
-
+optimizer = Optimizer_SGD(learning_rate = 1.5, decay = 0.0002, momentum = 0.9)
 
 for epoch in range(10001):
     layer1.forward(X)
@@ -33,7 +33,8 @@ for epoch in range(10001):
     if not epoch % 100:
         print(f'epoch: {epoch}, ' +
               f'acc: {accuracy:.3f}, ' + 
-              f'loss: {loss:.3f}')
+              f'loss: {loss:.3f}, ' + 
+              f'lr: {optimizer.current_learning_rate:.5f}')
     
     loss_activation2.backward(loss_activation2.outputs, y)
     layer2.backward(loss_activation2.dinputs)

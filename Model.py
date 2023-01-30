@@ -128,11 +128,15 @@ class Mean_Squared_Error(Loss):
     def backward(self, outputs, labels):
         self.dinputs = np.copy((2 * outputs - 2 * labels)/len(outputs))
 
+#class to combine both softmax activation functio and categorical cross entropy
 class Softmax_Entropy:
+
+    #create both classes to perform forward pass
     def __init__(self):
         self.activation = Activation_Softmax()
         self.loss_function = CategoricalCrossEntroy()
 
+    #forward pass, doing activation first and then calculating loss
     def forward(self, inputs, y_true):
         self.activation.forward(inputs)
 
@@ -140,33 +144,61 @@ class Softmax_Entropy:
 
         return self.loss_function.calculate(self.outputs, y_true)
     
+    #backward pass, derivative simplifies to ytrue - ypred
     def backward(self, outputs, labels):
         labels = np.array(labels)
 
         samples = len(outputs)
-        if (len(labels.shape) == 2):
+        if (len(labels.shape) == 2): #convert to shortened one hot encoded vector
             labels = np.argmax(labels, axis = 1)
         
         self.dinputs = outputs.copy()
 
+        #subtract 1 if the current label is the correct label for that sample
         self.dinputs[range(samples), labels] -= 1
 
+        #normalize gradient
         self.dinputs /= samples
 
+#the stochastic gradient descent (SGD) optimizer
 class Optimizer_SGD:
-    def __init__(self, learning_rate = 1.0, decay = 0):
+
+    #initializes learning rate, learning rate decay, and momentum
+    def __init__(self, learning_rate = 1.0, decay = 0, momentum = 0):
         self.learning_rate = learning_rate
         self.current_learning_rate = learning_rate
         self.decay = decay
+        self.momentum = momentum
         self.iterations = 0
     
+    #to be called before any parameter is updated, for now, it updates the learning rate
     def pre_update_params(self):
         if self.decay:
             self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
+    #the updating of params, adding momentum if needed
     def update_params(self, layer: Layer_Dense):
-        layer.weights -= self.current_learning_rate * layer.dweights
-        layer.bias -= self.current_learning_rate * layer.dbias
+        if self.momentum:
+            if not hasattr(layer, ""):
+                layer.weight_updates = np.zeros_like(layer.weights)
 
+                layer.bias_updates = np.zeros_like(layer.bias)
+                
+            weight_updates = self.momentum * layer.weight_updates - self.current_learning_rate * layer.dweights
+            bias_updates = self.momentum * layer.bias_updates - self.current_learning_rate * layer.dbias
+
+            layer.weight_updates = weight_updates
+            layer.bias_updates = bias_updates
+        
+        #if no momentum is added
+        else:  
+            weight_updates = -self.current_learning_rate * layer.dweights
+            bias_updates = -self.current_learning_rate * layer.dbias
+
+        layer.weights += weight_updates
+        layer.bias += bias_updates
+
+    #to be called after any parameter is updated, for now, to keep track of iterations
     def post_update_params(self):
         self.iterations += 1
+
