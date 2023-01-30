@@ -1,90 +1,47 @@
 import numpy as np
+import nnfs
+from nnfs.datasets import spiral_data
 import matplotlib.pyplot as plt
+from Model import *
 
-soft_output = np.array([[0.7, 0.1, 0.2],
-                        [0.4, 0.3, 0.3]])
+nnfs.init()
 
-dvalues = np.array([[1, 2, 3],
-                    [3, 2, 1]])
+X, y = spiral_data(100, 3)
 
-dinputs = np.empty_like(dvalues)
+layer1 = Layer_Dense(2, 64)
+layer2 = Layer_Dense(64, 3)
 
-for i, (singout, singdvalue) in enumerate(zip(soft_output, dvalues)):
-    singout = np.reshape(singout, (1,-1))
-    jacobian = np.diagflat(singout) - np.dot(singout.T, singout)
-    dinputs[i] = np.dot(jacobian, singdvalue)
+activation1 = Activation_ReLU()
+loss_activation2 = Softmax_Entropy()
 
-
-jacobians = []
-for row in soft_output:
-    row = np.reshape(np.array([row]), (1, len(soft_output[0])))
-    jacobians.append(np.dot(row.T, row))
-
-jacobians = np.array(jacobians)
-
-# #forward layer of 3 neurons
-
-# target = np.array([[1, 0, 0],
-#                    [0, 0, 1],
-#                    [1, 0, 0],
-#                    [0, 0, 1],
-#                    [0, 1, 0],
-#                    [1, 0, 0],
-#                    [0, 1, 0],
-#                    [0, 1, 0],
-#                    [0, 0, 1]])
-
-# inputs = np.array([[0.4, 0.3, 0.8, 0.1],
-#                    [0.7, 0.4, -0.2, 0.3],
-#                    [0.8, 0.4, -0.22, 0.4],
-#                    [0.5, 0.3, -0.4, 0.6],
-#                    [0.1, -0.3, 0.2, 0.7],
-#                    [0.4, 0.9, 0.9, -0.3],
-#                    [0.2, 0.7, 0.3, 0.2],
-#                    [0.1, -0.6, -0.2, 0.3],
-#                    [0.1, 0.2, -0.5, 0.98]])
-# weights = np.array([[-0.4, -0.7, 0.9, 1.1], # neuron 1
-#                    [-0.7, -0.6, 0.8, 0.4], # neuron 2
-#                    [0.9, 0.7, 0.7, 0.1]]).T  # neuron 3
+optimizer = Optimizer_SGD(learning_rate = 0.85)
 
 
-# bias = [[0.2, 0.3, -0.4]]
+for epoch in range(10001):
+    layer1.forward(X)
+    activation1.forward(layer1.outputs)
 
-# z = np.dot(inputs, weights) + bias
-# output = np.maximum(0, z)
+    layer2.forward(activation1.outputs)
 
-# drelu = np.ones(z.shape)
+    loss = loss_activation2.forward(layer2.outputs, y)
 
+    predictions = np.argmax(loss_activation2.outputs, axis=1)
+    if len(y.shape) == 2:
+        y = np.argmax(y, axis=1) 
+    accuracy = np.mean(predictions==y)
 
-# drelu[z <= 0] = 0
+    if not epoch % 100:
+        print(f'epoch: {epoch}, ' +
+              f'acc: {accuracy:.3f}, ' + 
+              f'loss: {loss:.3f}')
+    
+    loss_activation2.backward(loss_activation2.outputs, y)
+    layer2.backward(loss_activation2.dinputs)
+    activation1.backward(layer2.dinputs)
+    layer1.backward(activation1.dinputs)
 
-# #backward
-# y = np.array([])
-# n = 100
-# for i in range(n):
-#     drelu = np.ones(z.shape)
-#     drelu[z <= 0] = 0
-#     dvalue = np.multiply((2 * output - 2 * target)/len(output), drelu)
-
-#     dweights = np.dot(inputs.T, dvalue)
-#     dinputs = np.dot(dvalue, weights.T)
-#     dbias = np.sum(dvalue, axis = 0, keepdims = True)
-
-#     weights -= 0.5 * dweights
-#     bias -= 0.5 * dbias
-
-#     z = np.dot(inputs, weights) + bias
-#     output = np.maximum(0, z)
-#     y = np.append(y, np.mean((output - target) ** 2))
+    optimizer.update_params(layer1)
+    optimizer.update_params(layer2)
 
 
-# print(output)
-# cost = (output - target) ** 2
-# print(np.mean(cost))
-
-# x = range(n)
-
-# fig, ax = plt.subplots()
-# ax.plot(x, y)
-# plt.show()
 
