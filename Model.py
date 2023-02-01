@@ -1,9 +1,4 @@
 import numpy as np
-import nnfs 
-from nnfs.datasets import spiral_data, vertical_data
-from timeit import timeit
-
-nnfs.init()
 
 class Layer_Dense:
     #parameters are the number of neurons by the number of features
