@@ -1,12 +1,9 @@
 import numpy as np
-import nnfs
-from nnfs.datasets import spiral_data
 import matplotlib.pyplot as plt
 from Model import *
 from ReadData import *
 import time
 
-nnfs.init()
 
 X, y = iris_load_data()
 
