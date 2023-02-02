@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-def mnist_load_data(input_file = "Data/train-images-idx3-ubyte", label_file = "train-labels-idx1-ubyte"):
+def mnist_load_data(input_file = "Data/train-images-idx3-ubyte", label_file = "Data/train-labels-idx1-ubyte"):
     print("Loading data...")
     f = open(input_file, "rb")
     x = f.read()
@@ -19,7 +19,7 @@ def mnist_load_data(input_file = "Data/train-images-idx3-ubyte", label_file = "t
     for i in range(length):
         input = []
         for j in range(sample_length):
-            input.append(x[index])
+            input.append(x[index]/255)
             index += 1
         inputs.append(input)
     
@@ -56,10 +56,35 @@ def iris_load_data(input_file = "Data/iris.data"):
             break
     return np.array(inputs), np.array(labels)
 
+def shuffle_data(inputs, labels, batch_size = 1):
+    batches = []
+    targets = []
+
+    batch = []
+    label = []
+    for i in range(len(inputs)):
+        if (i+1) % batch_size == 0:
+            batch.append(np.array(inputs[i]))
+            label.append(np.array(labels[i]))
+            batches.append(np.array(batch))
+            targets.append(np.array(label))
+            batch = []
+            label = []
+        else:
+            batch.append(np.array(inputs[i]))
+            label.append(np.array(labels[i]))
+    
+    if (len(batch) > 0):
+        batches.append(np.array(batch))
+    if (len(label) > 0):
+        targets.append(np.array(label))
+
+    return (np.array(batches, dtype = np.ndarray), np.array(targets, dtype = np.ndarray))
+
 
 if __name__ == "__main__":
-    inputs, labels = iris_load_data()
-    print(inputs)
+    data = [[1, 2, 3], [7 ,8 ,9], [10, 12, 13], [0.3, 0.6, 0.19], [18, 19, 20]]
+    labels = [0, 2, 1, 2, 0]
     # inputs, labels = mnist_load_data()
     # pictures = []
     # for i in range(10):
