@@ -67,6 +67,7 @@ print(f"no model obj: ")
 
 
 
+
 l1 = Layer(3, 3)
 l1.set_weight(l1weights)
 l1.set_bias(l1bias)
