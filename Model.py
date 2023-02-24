@@ -1,6 +1,6 @@
 import numpy as np
 
-class Layer_Dense:
+class Layer:
     #parameters are the number of neurons by the number of features
     def __init__(self, n_inputs, n_neurons):
         self.weights = 0.5 * np.random.randn(n_inputs, n_neurons)
@@ -26,7 +26,7 @@ class Layer_Dense:
         self.dbias = np.sum(dvalues, axis = 0, keepdims = True)
 
 #The relu activation function
-class Activation_ReLU:
+class ReLU:
     #the inputs are meant to be the output of a forward pass of a dense layer
     #calculates the ReLU of the inputs
     def forward(self, inputs):
@@ -40,7 +40,7 @@ class Activation_ReLU:
         self.dinputs[self.inputs <= 0] = 0
 
 #The softmax activation function
-class Activation_Softmax:
+class Softmax:
     #the inputs are meant to be the output of a hidden layer typically using a ReLU activation function
     #The forward pass of a softmax function (exponentiation and normalization)
     def forward(self, inputs):
@@ -128,7 +128,7 @@ class Softmax_Entropy:
 
     #create both classes to perform forward pass
     def __init__(self):
-        self.activation = Activation_Softmax()
+        self.activation = Softmax()
         self.loss_function = CategoricalCrossEntroy()
 
     #forward pass, doing activation first and then calculating loss
@@ -172,7 +172,7 @@ class Optimizer_SGD:
             self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
     #the updating of params, adding momentum if needed
-    def update_params(self, layer: Layer_Dense):
+    def update_params(self, layer: Layer):
         if self.momentum:
             if not hasattr(layer, ""):
                 layer.weight_updates = np.zeros_like(layer.weights)
