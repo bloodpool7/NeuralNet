@@ -8,10 +8,10 @@ import time
 X, y = mnist_load_data()
 X_valid, y_valid = mnist_load_test()
 
-layer1 = Layer_Dense(784, 200)
-layer2 = Layer_Dense(200, 10)
+layer1 = Layer(784, 200)
+layer2 = Layer(200, 10)
 
-activation1 = Activation_ReLU()
+activation1 = ReLU()
 loss_activation2 = Softmax_Entropy()
 
 optimizer = Optimizer_SGD(learning_rate = 0.05, momentum = 0.9, decay = 0.0001)
