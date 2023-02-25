@@ -14,7 +14,7 @@ layer2 = Layer(200, 10)
 activation1 = ReLU()
 loss_activation2 = Softmax_Entropy()
 
-optimizer = Optimizer_SGD(learning_rate = 0.05, momentum = 0.9, decay = 0.0001)
+optimizer = SGD(learning_rate = 0.05, momentum = 0.9, decay = 0.0001)
 
 X, y = shuffle_data(X, y, 128)
 print("Beginning Training... ")

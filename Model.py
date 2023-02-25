@@ -156,7 +156,7 @@ class Softmax_Entropy:
         self.dinputs /= samples
 
 #the stochastic gradient descent (SGD) optimizer
-class Optimizer_SGD:
+class SGD:
 
     #initializes learning rate, learning rate decay, and momentum
     def __init__(self, learning_rate = 1.0, decay = 0, momentum = 0):
@@ -179,8 +179,8 @@ class Optimizer_SGD:
 
                 layer.bias_updates = np.zeros_like(layer.bias)
                 
-            weight_updates = self.momentum * layer.weight_updates - self.current_learning_rate * layer.dweights
-            bias_updates = self.momentum * layer.bias_updates - self.current_learning_rate * layer.dbias
+            weight_updates = -self.learning_rate * layer.dweights - self.momentum * layer.weight_updates
+            bias_updates =  -self.learning_rate * layer.dbias - self.momentum * layer.bias_updates 
 
             layer.weight_updates = weight_updates
             layer.bias_updates = bias_updates
@@ -197,3 +197,10 @@ class Optimizer_SGD:
     def post_update_params(self):
         self.iterations += 1
 
+class Adam:
+    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-7):
+        self.learning_rate = learning_rate
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.epsilon = epsilon
+    
