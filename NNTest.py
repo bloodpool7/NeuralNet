@@ -19,7 +19,7 @@ optimizer = SGD(learning_rate = 0.05, momentum = 0.9, decay = 0.0001)
 X, y = shuffle_data(X, y, 128)
 print("Beginning Training... ")
 start = time.time()
-for epoch in range(50):
+for epoch in range(21):
     accuracies = []
     for i in range(len(X)):
         layer1.forward(X[i])
