@@ -198,9 +198,16 @@ class SGD:
         self.iterations += 1
 
 class Adam:
-    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-7):
+    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8):
         self.learning_rate = learning_rate
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
+        self.iterations = 0
+    
+    def update_params(self, layer: Layer):
+        pass
+
+    def post_update_params(self):
+        self.iterations += 1
     
