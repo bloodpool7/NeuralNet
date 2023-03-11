@@ -202,8 +202,6 @@ class Adam:
         self.iterations = 0
     
     def update_params(self, layer: Layer):
-        pass
-
-    def post_update_params(self):
         self.iterations += 1
+
     
