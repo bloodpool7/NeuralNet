@@ -20,10 +20,10 @@ class Layer:
         self.outputs =  np.dot(inputs, self.weights) + self.bias
     
     #the backward pass of a layer (calculating gradient)
-    def backward(self, dvalues):
-        self.dweights = np.dot(self.inputs.T, dvalues)
-        self.dinputs = np.dot(dvalues, self.weights.T)
-        self.dbias = np.sum(dvalues, axis = 0, keepdims = True)
+    def backward(self, derivatives):
+        self.dweights = np.dot(self.inputs.T, derivatives)
+        self.dinputs = np.dot(derivatives, self.weights.T)
+        self.dbias = np.sum(derivatives, axis = 0, keepdims = True)
 
 #The relu activation function
 class ReLU:
@@ -34,8 +34,8 @@ class ReLU:
         self.outputs = np.maximum(0, inputs)
     
     #calculates the gradient of the ReLU function with respect to its inputs
-    def backward(self, dvalues):
-        self.dinputs = dvalues.copy()
+    def backward(self, derivatives):
+        self.dinputs = derivatives.copy()
         
         self.dinputs[self.inputs <= 0] = 0
 
@@ -54,9 +54,9 @@ class Softmax:
     #i is the sample number
     #j is the output we are taking the derivative of
     #k is the input we are taking the derivative in respect to
-    def backward(self, dvalues):
-        self.dinputs = np.empty_like(dvalues)
-        for i,(single_output, single_dvalue) in enumerate(zip(self.outputs, dvalues)):
+    def backward(self, derivatives):
+        self.dinputs = np.empty_like(derivatives)
+        for i,(single_output, single_dvalue) in enumerate(zip(self.outputs, derivatives)):
             single_output = np.reshape(single_output, (1,-1))
 
             jacobian = np.diagflat(single_output) - np.dot(single_output.T, single_output)
@@ -166,13 +166,11 @@ class SGD:
         self.momentum = momentum
         self.iterations = 0
     
-    #to be called before any parameter is updated, for now, it updates the learning rate
-    def pre_update_params(self):
+    #the updating of params, adding momentum if needed
+    def update_params(self, layer: Layer):
         if self.decay:
             self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
-    #the updating of params, adding momentum if needed
-    def update_params(self, layer: Layer):
         if self.momentum:
             if not hasattr(layer, ""):
                 layer.weight_updates = np.zeros_like(layer.weights)
@@ -193,9 +191,7 @@ class SGD:
         layer.weights += weight_updates
         layer.bias += bias_updates
 
-    #to be called after any parameter is updated, for now, to keep track of iterations
-    def post_update_params(self):
-        self.iterations += 1
+        self. iterations += 1
 
 class Adam:
     def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8):
