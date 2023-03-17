@@ -204,4 +204,13 @@ class Adam:
     def update_params(self, layer: Layer):
         self.iterations += 1
 
+# A model object
+class Model:
+    def __init__(self, layers: list, activations: list, loss, optimizer):
+        self.layers = layers
+        self.activations = activations
+        self.optimizer = optimizer
+        self.loss_function = loss 
     
+    
+
