@@ -210,7 +210,37 @@ class Model:
         self.layers = layers
         self.activations = activations
         self.optimizer = optimizer
-        self.loss_function = loss 
-    
-    
+        self.loss_function = loss
 
+        if (isinstance(self.activations[-1], Softmax) and isinstance(self.loss_function, CategoricalCrossEntroy)):
+            self.activations.pop()
+            self.loss_function = Softmax_Entropy()
+    
+    def forward(self, inputs, targets):
+        self.layers[0].forward(inputs)
+        self.activations[0].forward(self.layers[0].outputs)
+
+        for i in range(1, len(self.layers)):
+            if (i + 1 == len(self.layers)):
+                if (len(self.activations) == len(self.layers)):
+                    self.layers[i].forward(self.activations[i-1].outputs)
+                    self.activations[i].forward(self.layers[i].outputs)
+
+                    self.loss = self.loss_function.calculate(self.activations[i].outputs, targets)
+
+                    predictions = np.argmax(self.activations[-1].outputs, axis=1)
+                    if len(targets.shape) == 2:
+                        targets = np.argmax(targets, axis=1)
+                    self.accuracy = np.mean(predictions == targets) 
+                else:
+                    self.layers[i].forward(self.activations[i-1].outputs)
+                    self.loss = self.loss_function.forward(self.layers[i].outputs, targets)
+
+                    predictions = np.argmax(self.activations[-1].outputs, axis=1)
+                    if len(targets.shape) == 2:
+                        targets = np.argmax(targets, axis=1)
+                    self.accuracy = np.mean(predictions == targets)
+            else:
+                
+                self.layers[i].forward(self.activations[i-1].outputs)
+                self.activations[i].forward(self.layers[i].outputs)
