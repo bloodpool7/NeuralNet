@@ -155,8 +155,23 @@ class Softmax_Entropy:
         #normalize gradient
         self.dinputs /= samples
 
+#an interface for all optimizers
+class Optimizer:
+
+    #To be called before parameter updates
+    def pre_param_updates(self):
+        pass
+    
+    #To be called to update each layer's weights and biases
+    def update_params(self, layer: Layer):
+        pass 
+
+    #To be called after all layers' weights and biases have been updated
+    def post_param_updates(self):
+        pass
+
 #the stochastic gradient descent (SGD) optimizer
-class SGD:
+class SGD(Optimizer):
 
     #initializes learning rate, learning rate decay, and momentum
     def __init__(self, learning_rate = 1.0, decay = 0, momentum = 0):
@@ -166,11 +181,12 @@ class SGD:
         self.momentum = momentum
         self.iterations = 0
     
-    #the updating of params, adding momentum if needed
-    def update_params(self, layer: Layer):
+    def pre_param_updates(self):
         if self.decay:
             self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
+    #the updating of params, adding momentum if needed
+    def update_params(self, layer: Layer):
         if self.momentum:
             if not hasattr(layer, ""):
                 layer.weight_updates = np.zeros_like(layer.weights)
@@ -191,9 +207,10 @@ class SGD:
         layer.weights += weight_updates
         layer.bias += bias_updates
 
+    def post_param_updates(self):
         self. iterations += 1
 
-class Adam:
+class Adam(Optimizer):
     def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8):
         self.learning_rate = learning_rate
         self.beta1 = beta1
@@ -206,7 +223,7 @@ class Adam:
 
 # A model object
 class Model:
-    def __init__(self, layers: list, activations: list, loss, optimizer):
+    def __init__(self, layers: list, activations: list, loss, optimizer: Optimizer):
         self.layers = layers
         self.activations = activations
         self.optimizer = optimizer
@@ -241,6 +258,35 @@ class Model:
                         targets = np.argmax(targets, axis=1)
                     self.accuracy = np.mean(predictions == targets)
             else:
-                
+
                 self.layers[i].forward(self.activations[i-1].outputs)
                 self.activations[i].forward(self.layers[i].outputs)
+    
+    def backward(self, labels):
+        self.loss_function.backward(self.loss_fuction.outputs, labels)
+
+        if isinstance(self.loss_function, Softmax_Entropy):
+            self.layers[-1].backward(self.loss_function.dinputs)
+
+            for i in range(len(self.activations) - 1, -1 , -1):
+                self.activations[i].backward(self.layers[i+1].dinputs)
+                self.layers[i].backward(self.activations[i].dinputs)
+
+        else:
+            self.activations[-1].backward(self.loss_function.dinputs)
+            self.layers[-1].backward(self.activations[-1].dinputs)
+
+            for i in range(len(self.layers) - 2, -1, -1):
+                self.activations[i].backward(self.layers[i + 1].dinputs)
+                self.layers[i].backward(self.activations[i].dinputs)
+
+        self.optimizer.pre_param_updates()
+        for layer in self.layers:
+            self.optimizer.update_params(layer)
+        self.optimizer.post_param_updates()
+    
+    def train(X_train = None, X_valid = None, y_train = None, y_valid = None):
+        pass 
+
+    def predict(X, y = None):
+        pass
