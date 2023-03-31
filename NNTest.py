@@ -14,7 +14,7 @@ layer2 = Layer(200, 10)
 activation1 = ReLU()
 loss_activation2 = Softmax_Entropy()
 
-optimizer = SGD(learning_rate = 0.05, momentum = 0.9, decay = 0.0001)
+optimizer = Adam()
 
 X, y = shuffle_data(X, y, 128)
 print("Beginning Training... ")
@@ -39,15 +39,15 @@ for epoch in range(21):
         activation1.backward(layer2.dinputs)
         layer1.backward(activation1.dinputs)
 
-        optimizer.pre_update_params()
+        optimizer.pre_param_updates()
         optimizer.update_params(layer1)
         optimizer.update_params(layer2)
-        optimizer.post_update_params()
+        optimizer.post_param_updates()
     if not epoch % 1:
         print(f'epoch: {epoch}, ' +
               f'acc: {np.mean(accuracies):.3f}, ' + 
               f'loss: {loss:.3f}, ' + 
-              f'lr: {optimizer.current_learning_rate:.5f}')
+              f'lr: {optimizer.learning_rate:.5f}')
 
 end = time.time()
 

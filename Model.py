@@ -176,14 +176,13 @@ class SGD(Optimizer):
     #initializes learning rate, learning rate decay, and momentum
     def __init__(self, learning_rate = 1.0, decay = 0, momentum = 0):
         self.learning_rate = learning_rate
-        self.current_learning_rate = learning_rate
         self.decay = decay
         self.momentum = momentum
         self.iterations = 0
     
     def pre_param_updates(self):
         if self.decay:
-            self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
+            self.learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
     #the updating of params, adding momentum if needed
     def update_params(self, layer: Layer):
@@ -201,8 +200,8 @@ class SGD(Optimizer):
         
         #if no momentum is added
         else:  
-            weight_updates = -self.current_learning_rate * layer.dweights
-            bias_updates = -self.current_learning_rate * layer.dbias
+            weight_updates = -self.learning_rate * layer.dweights
+            bias_updates = -self.learning_rate * layer.dbias
 
         layer.weights += weight_updates
         layer.bias += bias_updates
@@ -220,6 +219,7 @@ class Adam(Optimizer):
         self.beta2 = beta2
         self.epsilon = epsilon
         self.iterations = 0
+
     
     #To be called per layer
     def update_params(self, layer: Layer):
@@ -240,9 +240,9 @@ class Adam(Optimizer):
 
         #Getting all the bias momentums and velocities to make the bias update
         layer.bias_moments = self.beta1 * layer.bias_moments + (1 - self.beta1) * layer.dbias
-        layer.bias_velocity = self.beta2 * layer.weight_velocity + (1 - self.beta2) * (layer.dbias ** 2)
-        bias_moments_corrected = layer.weight_moments / (1 - self.beta1 ** self.iterations)
-        bias_velocity_corrected = layer.weight_velocity / (1 - self.beta2 ** self.iterations)
+        layer.bias_velocity = self.beta2 * layer.bias_velocity + (1 - self.beta2) * (layer.dbias ** 2)
+        bias_moments_corrected = layer.bias_moments / (1 - self.beta1 ** (self.iterations + 1))
+        bias_velocity_corrected = layer.bias_velocity / (1 - self.beta2 ** (self.iterations + 1))
 
         #updating the params
         layer.weights -= (self.learning_rate * weight_moments_corrected) / (np.sqrt(weight_velocity_corrected) + self.epsilon)
