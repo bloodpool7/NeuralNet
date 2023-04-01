@@ -14,7 +14,7 @@ layer2 = Layer(200, 10)
 activation1 = ReLU()
 loss_activation2 = Softmax_Entropy()
 
-optimizer = Adam()
+optimizer = Adam(decay = 1e-5)
 
 X, y = shuffle_data(X, y, 128)
 print("Beginning Training... ")

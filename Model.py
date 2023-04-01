@@ -213,14 +213,18 @@ class SGD(Optimizer):
 class Adam(Optimizer):
 
     #default values for hyperparameters 
-    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8):
+    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8, decay = 0):
         self.learning_rate = learning_rate
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
         self.iterations = 0
+        self.decay = decay
 
-    
+    def pre_update_params(self): 
+        if self.decay:
+            self.current_learning_rate = self.learning_rate * (1. / (1. + self.decay * self.iterations))
+
     #To be called per layer
     def update_params(self, layer: Layer):
 
@@ -235,8 +239,8 @@ class Adam(Optimizer):
         #Getting all the weight momentums and velocities to make the weight update
         layer.weight_moments = self.beta1 * layer.weight_moments + (1 - self.beta1) * layer.dweights
         layer.weight_velocity = self.beta2 * layer.weight_velocity + (1 - self.beta2) * (layer.dweights ** 2)
-        weight_moments_corrected = layer.weight_moments / (1 - self.beta1 ** self.iterations)
-        weight_velocity_corrected = layer.weight_velocity / (1 - self.beta2 ** self.iterations)
+        weight_moments_corrected = layer.weight_moments / (1 - self.beta1 ** (self.iterations + 1))
+        weight_velocity_corrected = layer.weight_velocity / (1 - self.beta2 ** (self.iterations + 1))
 
         #Getting all the bias momentums and velocities to make the bias update
         layer.bias_moments = self.beta1 * layer.bias_moments + (1 - self.beta1) * layer.dbias
