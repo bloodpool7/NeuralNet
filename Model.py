@@ -213,7 +213,7 @@ class SGD(Optimizer):
 class Adam(Optimizer):
 
     #default values for hyperparameters 
-    def __init__(self, learning_rate = 0.001, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, decay = 0):
+    def __init__(self, learning_rate = 0.001, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8):
         self.learning_rate = learning_rate
         self.beta1 = beta1
         self.beta2 = beta2
