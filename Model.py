@@ -182,7 +182,7 @@ class SGD(Optimizer):
     
     def pre_param_updates(self):
         if self.decay:
-            self.learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
+            self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
     #the updating of params, adding momentum if needed
     def update_params(self, layer: Layer):
@@ -192,16 +192,16 @@ class SGD(Optimizer):
 
                 layer.bias_updates = np.zeros_like(layer.bias)
                 
-            weight_updates = -self.learning_rate * layer.dweights - self.momentum * layer.weight_updates
-            bias_updates =  -self.learning_rate * layer.dbias - self.momentum * layer.bias_updates 
+            weight_updates = -self.current_learning_rate * layer.dweights - self.momentum * layer.weight_updates
+            bias_updates =  -self.current_learning_rate * layer.dbias - self.momentum * layer.bias_updates 
 
             layer.weight_updates = weight_updates
             layer.bias_updates = bias_updates
         
         #if no momentum is added
         else:  
-            weight_updates = -self.learning_rate * layer.dweights
-            bias_updates = -self.learning_rate * layer.dbias
+            weight_updates = -self.current_learning_rate * layer.dweights
+            bias_updates = -self.current_learning_rate * layer.dbias
 
         layer.weights += weight_updates
         layer.bias += bias_updates
@@ -213,7 +213,7 @@ class SGD(Optimizer):
 class Adam(Optimizer):
 
     #default values for hyperparameters 
-    def __init__(self, learning_rate=0.01, beta1 = 0.999, beta2 = 0.9, epsilon = 1e-8, decay = 0):
+    def __init__(self, learning_rate = 0.001, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, decay = 0):
         self.learning_rate = learning_rate
         self.beta1 = beta1
         self.beta2 = beta2
