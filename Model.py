@@ -9,10 +9,12 @@ class Layer:
     #setting the weights
     def set_weight(self, weight_in):
         self.weights = np.array(weight_in)
+        self.weights = self.weights.astype(np.float64)
 
     #setting the biases
     def set_bias(self, bias_in):
         self.bias = np.array(bias_in)
+        self.bias = self.bias.astype(np.float64)
 
     #the forward pass of a layer (dot product basically)
     def forward(self, inputs):
@@ -97,7 +99,7 @@ class CategoricalCrossEntroy(Loss):
         labels = np.array(labels)
         if (len(labels.shape) == 1):
             labels = np.eye(len(outputs[0]))[labels]
-        
+
         self.dinputs = -labels/outputs 
 
         self.dinputs /= samples
@@ -300,9 +302,9 @@ class Model:
                 self.__activations[i].forward(self.__layers[i].outputs)
     
     def __backward(self, labels):
-        self.__loss_function.backward(self.loss_fuction.outputs, labels)
-
+        
         if isinstance(self.__loss_function, Softmax_Entropy):
+            self.__loss_function.backward(self.loss_fuction.outputs, labels)
             self.__layers[-1].backward(self.__loss_function.dinputs)
 
             for i in range(len(self.__activations) - 1, -1 , -1):
@@ -310,6 +312,7 @@ class Model:
                 self.__layers[i].backward(self.__activations[i].dinputs)
 
         else:
+            self.__loss_function.backward(self.__activations[-1].outputs, labels)
             self.__activations[-1].backward(self.__loss_function.dinputs)
             self.__layers[-1].backward(self.__activations[-1].dinputs)
 
@@ -321,6 +324,7 @@ class Model:
         for layer in self.__layers:
             self.__optimizer.update_params(layer)
         self.__optimizer.post_param_updates()
+
     
     def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None):
         pass 

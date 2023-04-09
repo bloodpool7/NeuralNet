@@ -5,26 +5,20 @@ from ReadData import *
 import time
 
 #weights & biases initialized the same for all layers for testing
-l1weights = np.array([[3, 2, 4],
-             [-2, 4, 1],
-             [3, 2, -3]]).tolist()
-l2weights = np.array([[3, 5, 4],
-             [-2, 4, 1],
-             [3, 2, -3]]).tolist()
-l3weights = np.array([[3, 2],
-             [-2, 4],
-             [3, 2]]).tolist()
+l1weights = (0.5 * np.random.randn(3, 3)).tolist()
+l2weights = (0.5 * np.random.randn(3, 3)).tolist()
+l3weights = (0.5 * np.random.randn(3, 2)).tolist()
 
-l1bias = np.array([[3, 2, -4]]).tolist()
-l2bias = np.array([[2, 3, 1]]).tolist()
-l3bias = np.array([[3, -2]]).tolist()
+l1bias = np.array([[0, 0, 0]]).tolist()
+l2bias = np.array([[0, 0, 0]]).tolist()
+l3bias = np.array([[0, 0]]).tolist()
 
 weights = [l1weights, l2weights, l3weights]
 biases = [l1bias, l2bias, l3bias]
 
 inputs = np.array([[1, 2, 3]])
 
-targets = np.array([0])
+targets = np.array([1])
 
 l1 = Layer(3, 3)
 l1.set_weight(l1weights)
@@ -42,7 +36,9 @@ a1 = ReLU()
 a2 = ReLU()
 a3 = Softmax()
 
-loss1 = CategoricalCrossEntroy()
+loss1 = Mean_Squared_Error()
+
+optimizer = Adam()
 
 # Using Model Object
 
@@ -50,13 +46,70 @@ model = Model(
     layers = [l1, l2, l3],
     activations = [a1, a2, a3],
     loss = loss1,
-    optimizer = SGD(learning_rate = 0.1)
+    optimizer = optimizer
 )
+
+print(f"model obj: ")
+print(model.predict(inputs, targets))
+print(model.loss)
+
+print()
+
+model.backward(targets)
 
 print(model.predict(inputs, targets))
 print(model.loss)
 
 #Without Model Object (control)
+
+print(f"no model obj: ")
+
+l1 = Layer(3, 3)
+l1.set_weight(l1weights)
+l1.set_bias(l1bias)
+
+l2 = Layer(3, 3)
+l2.set_weight(l2weights)
+l2.set_bias(l2bias)
+
+l3 = Layer(3, 2)
+l3.set_weight(l3weights)
+l3.set_bias(l3bias)
+
+a1 = ReLU()
+a2 = ReLU()
+a3 = Softmax()
+
+loss1 = Mean_Squared_Error()
+
+optimizer = Adam()
+
+l1.forward(inputs)
+a1.forward(l1.outputs)
+l2.forward(a1.outputs)
+a2.forward(l2.outputs)
+l3.forward(a2.outputs)
+a3.forward(l3.outputs)
+
+loss_out = loss1.calculate(a3.outputs, targets)
+
+print(a3.outputs)
+print(loss_out)
+print()
+
+loss1.backward(a3.outputs, targets)
+a3.backward(loss1.dinputs)
+l3.backward(a3.dinputs)
+a2.backward(l3.dinputs)
+l2.backward(a2.dinputs)
+a1.backward(l2.dinputs)
+l1.backward(a1.dinputs)
+
+optimizer.pre_param_updates()
+optimizer.update_params(l1)
+optimizer.update_params(l2)
+optimizer.update_params(l3)
+optimizer.post_param_updates()
 
 l1.forward(inputs)
 a1.forward(l1.outputs)
