@@ -42,7 +42,7 @@ a1 = ReLU()
 a2 = ReLU()
 a3 = Softmax()
 
-loss1 = Mean_Squared_Error()
+loss1 = CategoricalCrossEntroy()
 
 # Using Model Object
 

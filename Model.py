@@ -337,7 +337,7 @@ class Model:
     def save_model(self, weight_name, bias_name):
         weights = []
         biases = []
-        
+
         for i in range(len(self.__layers)):
             weights.append(self.__layers[i].weights.tolist())
             biases.append(self.__layers[i].bias.tolist())
