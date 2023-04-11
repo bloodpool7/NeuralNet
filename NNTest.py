@@ -46,15 +46,15 @@ loss1 = Mean_Squared_Error()
 
 # Using Model Object
 
-# model = Model(
-#     layers = [l1, l2, l3],
-#     activations = [a1, a2, a3],
-#     loss = loss1,
-#     optimizer = SGD(learning_rate = 0.1)
-# )
+model = Model(
+    layers = [l1, l2, l3],
+    activations = [a1, a2, a3],
+    loss = loss1,
+    optimizer = SGD(learning_rate = 0.1)
+)
 
-# print(model.predict(inputs, targets))
-# print(model.loss)
+print(model.predict(inputs, targets))
+print(model.loss)
 
 #Without Model Object (control)
 
@@ -65,7 +65,7 @@ a2.forward(l2.outputs)
 l3.forward(a2.outputs)
 a3.forward(l3.outputs)
 
-loss_out = loss1.calculate(a3.outputs)
+loss_out = loss1.calculate(a3.outputs, targets)
 
 print(a3.outputs)
 print(loss_out)
