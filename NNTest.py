@@ -5,51 +5,63 @@ from ReadData import *
 import time
 
 #weights & biases initialized the same for all layers for testing
-
-
-# Using Model Object
-
 l1weights = np.array([[3, 2, 4],
              [-2, 4, 1],
-             [3, 2, -3]])
-l2weights = np.array([[3, 2, 4],
+             [3, 2, -3]]).tolist()
+l2weights = np.array([[3, 5, 4],
              [-2, 4, 1],
-             [3, 2, -3]])
+             [3, 2, -3]]).tolist()
 l3weights = np.array([[3, 2],
              [-2, 4],
-             [3, 2]])
+             [3, 2]]).tolist()
 
-l1bias = np.array([[3, 2, -4]])
-l2bias = np.array([[2, 3, 1]])
-l3bias = np.array([[3, -2, 2]])
+l1bias = np.array([[3, 2, -4]]).tolist()
+l2bias = np.array([[2, 3, 1]]).tolist()
+l3bias = np.array([[3, -2]]).tolist()
 
 weights = [l1weights, l2weights, l3weights]
 biases = [l1bias, l2bias, l3bias]
 
-np.save("weights.npy", np.array(weights, dtype = object), allow_pickle = True)
-np.save("biases.npy", np.array(biases, dtype = object), allow_pickle = True)
+l1 = Layer(3, 3)
 
-weights = np.load("weights.npy", allow_pickle = True)
-biases = np.load("biases,npy", allow_pickle = True)
 
-print(weights)
-print(biases)
+l2 = Layer(3, 3)
 
-# model = Model(
-#     # layers = [Layer(3, 3), Layer(3, 3), Layer(3, 2)],
-#     activations = [ReLU(), ReLU(), Softmax()],
-#     loss = Mean_Squared_Error(),
-#     optimizer = SGD(learning_rate = 0.1)
-# )
+
+
+l3 = Layer(3, 2)
+
+
+# Using Model Object
+
+model = Model(
+    layers = [l1, l2, l3],
+    activations = [ReLU(), ReLU(), Softmax()],
+    loss = Mean_Squared_Error(),
+    optimizer = SGD(learning_rate = 0.1)
+)
+
+model.save_model()
 
 # model.load_model()
 
-# inputs = np.array([[1, 2, 3]])
+inputs = np.array([[1, 2, 3]])
 
-# targets = np.array([0])
+targets = np.array([0])
 
-# print(model.predict(inputs, targets))
-# print(model.loss)
+print(model.predict(inputs, targets))
+print(model.loss)
+
+model = Model(
+    activations = [ReLU(), ReLU(), Softmax()],
+    loss = Mean_Squared_Error(),
+    optimizer = SGD(learning_rate = 0.1)
+)
+
+model.load_model()
+
+print(model.predict(inputs, targets))
+print(model.loss)
 
 #Without Model Object (control)
 

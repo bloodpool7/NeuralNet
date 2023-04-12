@@ -9,12 +9,10 @@ class Layer:
     #setting the weights
     def set_weight(self, weight_in):
         self.weights = np.array(weight_in)
-        print(self.weights)
 
     #setting the biases
     def set_bias(self, bias_in):
         self.bias = np.array(bias_in)
-        print(self.bias)
 
     #the forward pass of a layer (dot product basically)
     def forward(self, inputs):
@@ -336,30 +334,22 @@ class Model:
             return self.__activations[-1].outputs
 
     #Saves the model using numpy save features
-    def save_model(self):
-        choice = input("Would you like to save the model? [y/n] -> ")
-        if (choice == "n"):
-            return None 
-        weights_name = input("Enter the file name for the weights without the file extension -> ")
-        biases_name = input("Enter the file name for the biases without the file extension -> ")
-
+    def save_model(self, weight_name, bias_name):
         weights = []
         biases = []
 
         for i in range(len(self.__layers)):
-            weights.append(self.__layers[i].weights.toList())
+            weights.append(self.__layers[i].weights.tolist())
             biases.append(self.__layers[i].bias.tolist())
 
-        np.save(weights_name + ".npy", np.array(weights, dtype = object), allow_pickle = True)
-        np.save(biases_name + ".npy", np.array(biases, dtype = object), allow_pickle = True)
+        np.save(weight_name, np.array(weights, dtype = object), allow_pickle = True)
+        np.save(bias_name, np.array(biases, dtype = object), allow_pickle = True)
 
     #Loads the model using the numpy save features
-    def load_model(self):
-        weights_name = input("Enter the file name for the weights -> ")
-        biases_name = input("Enter the file name for the biases -> ")
+    def load_model(self, weight_name, bias_name):
 
-        weights = np.load(weights_name, allow_pickle = True)
-        biases = np.load(biases_name, allow_pickle = True)
+        weights = np.load(weight_name, allow_pickle = True)
+        biases = np.load(bias_name, allow_pickle = True)
 
         for arr in weights:
             layer_weights = []
@@ -368,7 +358,7 @@ class Model:
             layer_weights = np.array(layer_weights)
 
             layer = Layer(len(layer_weights), len(layer_weights[0]))
-            layer.set_weight(arr)
+            layer.set_weight(layer_weights)
 
             self.__layers.append(layer)
         
@@ -378,5 +368,5 @@ class Model:
                 layer_biases.append(np.array(lists))
             layer_biases = np.array(layer_biases)
             
-            layer.set_bias(arr)
+            layer.set_bias(layer_biases)
 
