@@ -335,6 +335,7 @@ class Model:
         else:
             return self.__activations[-1].outputs
 
+    #Saves the model using numpy save features
     def save_model(self):
         choice = input("Would you like to save the model? [y/n] -> ")
         if (choice == "n"):
@@ -352,6 +353,7 @@ class Model:
         np.save(weights_name + ".npy", np.array(weights, dtype = object), allow_pickle = True)
         np.save(biases_name + ".npy", np.array(biases, dtype = object), allow_pickle = True)
 
+    #Loads the model using the numpy save features
     def load_model(self):
         weights_name = input("Enter the file name for the weights -> ")
         biases_name = input("Enter the file name for the biases -> ")
