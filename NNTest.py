@@ -28,13 +28,15 @@ targets = np.array([0])
 
 l1 = Layer(3, 3)
 l1.set_weight(l1weights)
+l1.set_bias(l1bias)
 
 l2 = Layer(3, 3)
-
+l2.set_weight(l2weights)
+l2.set_bias(l2bias)
 
 l3 = Layer(3, 2)
-
-
+l3.set_weight(l3weights)
+l3.set_bias(l3bias)
 
 a1 = ReLU()
 a2 = ReLU()
@@ -44,30 +46,29 @@ loss1 = Mean_Squared_Error()
 
 # Using Model Object
 
-model = Model(
-    layers = [l1, l2, l3],
-    activations = [a1, a2, a3],
-    loss = loss1,
-    optimizer = SGD(learning_rate = 0.1)
-)
-
-# print(model.predict(inputs, targets))
-# print(model.loss)
-
 # model = Model(
-#     activations = [ReLU(), ReLU(), Softmax()],
-#     loss = Mean_Squared_Error(),
+#     layers = [l1, l2, l3],
+#     activations = [a1, a2, a3],
+#     loss = loss1,
 #     optimizer = SGD(learning_rate = 0.1)
 # )
-
-# model.load_model()
 
 # print(model.predict(inputs, targets))
 # print(model.loss)
 
 #Without Model Object (control)
 
+l1.forward(inputs)
+a1.forward(l1.outputs)
+l2.forward(a1.outputs)
+a2.forward(l2.outputs)
+l3.forward(a2.outputs)
+a3.forward(l3.outputs)
 
+loss_out = loss1.calculate(a3.outputs)
+
+print(a3.outputs)
+print(loss_out)
 
 # X, y = mnist_load_data()
 # X_valid, y_valid = mnist_load_test()
