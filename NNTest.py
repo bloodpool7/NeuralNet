@@ -26,18 +26,30 @@ inputs = np.array([[1, 2, 3]])
 
 targets = np.array([0])
 
+l1 = Layer(3, 3)
+l1.set_weight(l1weights)
+
+l2 = Layer(3, 3)
+
+
+l3 = Layer(3, 2)
+
+
+
+a1 = ReLU()
+a2 = ReLU()
+a3 = Softmax()
+
+loss1 = Mean_Squared_Error()
+
 # Using Model Object
 
-# model = Model(
-#     #layers = [l1, l2, l3],
-#     activations = [ReLU(), ReLU(), Softmax()],
-#     loss = Mean_Squared_Error(),
-#     optimizer = SGD(learning_rate = 0.1)
-# )
-
-# model.save_model()
-
-# model.load_model()
+model = Model(
+    layers = [l1, l2, l3],
+    activations = [a1, a2, a3],
+    loss = loss1,
+    optimizer = SGD(learning_rate = 0.1)
+)
 
 # print(model.predict(inputs, targets))
 # print(model.loss)
@@ -54,8 +66,6 @@ targets = np.array([0])
 # print(model.loss)
 
 #Without Model Object (control)
-
-
 
 
 
