@@ -219,7 +219,6 @@ class Adam(Optimizer):
         self.beta2 = beta2
         self.epsilon = epsilon
         self.iterations = 0
-        self.decay = decay
 
     #To be called per layer
     def update_params(self, layer: Layer):
