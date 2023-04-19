@@ -253,13 +253,13 @@ class Adam(Optimizer):
 
 # A model object
 class Model:
-    def __init__(self, layers: list, activations: list, loss, optimizer: Optimizer):
-        self.layers = layers
-        self.activations = activations
+    def __init__(self, layers: list = None, activations: list = None, loss = None, optimizer: Optimizer = None):
+        self.layers = layers if layers != None else []
+        self.activations = activations if activations != None else []
         self.optimizer = optimizer
         self.loss_function = loss
 
-        if (isinstance(self.activations[-1], Softmax) and isinstance(self.loss_function, CategoricalCrossEntroy)):
+        if (activations != None and isinstance(self.activations[-1], Softmax) and isinstance(self.loss_function, CategoricalCrossEntroy)):
             self.activations.pop()
             self.loss_function = Softmax_Entropy()
     
@@ -320,3 +320,36 @@ class Model:
 
     def predict(X, y = None):
         pass
+
+    def save_model(self):
+        choice = input("Would you like to save the model? [y/n] -> ")
+        if (choice == "n"):
+            return None 
+        weights_name = input("Enter the file name for the weights without the file extension -> ")
+        biases_name = input("Enter the file name for the biases without the file extension -> ")
+
+        weights = np.array()
+        biases = np.array()
+
+        for i in range(len(self.layers)):
+            weights.append(self.layers[i].weights)
+            biases.append(self.layers[i].bias)
+
+        np.save(weights_name + ".npy", weights)
+        np.save(biases_name + ".npy", biases)
+
+    def load_model(self):
+        weights_name = input("Enter the file name for the weights -> ")
+        biases_name = input("Enter the file name for the biases -> ")
+
+        weights = np.load(weights_name)
+        biases = np.load(biases_name)
+
+        for i in range(len(weights)):
+
+            layer = Layer(len(weights[i]), len(weights[i][0]))
+            layer.set_weight(weights[i])
+            layer.set_bias(biases[i])
+
+            self.layers.append(layer )
+
