@@ -4,6 +4,10 @@ from Model import *
 from ReadData import *
 import time
 
+#weights & biases initialized the same for all layers for testing
+
+
+# Using Model Object
 l1 = Layer(3, 3)
 l2 = Layer(3, 3)
 l3 = Layer(3, 2)
@@ -28,6 +32,9 @@ inputs = np.array([[1, 2, 3]])
 targets = np.array([0])
 
 print(model.predict(inputs, targets))
+print(model.loss)
+
+#Without Model Object (control)
 
 # X, y = mnist_load_data()
 # X_valid, y_valid = mnist_load_test()

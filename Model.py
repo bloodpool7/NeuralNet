@@ -254,73 +254,84 @@ class Adam(Optimizer):
 # A model object
 class Model:
     def __init__(self, layers: list = None, activations: list = None, loss = None, optimizer: Optimizer = None):
-        self.layers = layers if layers != None else []
-        self.activations = activations if activations != None else []
-        self.optimizer = optimizer
-        self.loss_function = loss
+        self.__layers = layers if layers != None else []
+        self.__activations = activations if activations != None else []
+        self.__optimizer = optimizer
+        self.__loss_function = loss
 
-        if (activations != None and isinstance(self.activations[-1], Softmax) and isinstance(self.loss_function, CategoricalCrossEntroy)):
-            self.activations.pop()
-            self.loss_function = Softmax_Entropy()
+        if (activations != None and isinstance(self.__activations[-1], Softmax) and isinstance(self.__loss_function, CategoricalCrossEntroy)):
+            self.__activations.pop()
+            self.__loss_function = Softmax_Entropy()
     
-    def forward(self, inputs, targets):
-        self.layers[0].forward(inputs)
-        self.activations[0].forward(self.layers[0].outputs)
+    def __forward(self, inputs, targets):
+        '''Forward pass, assumes input comes in 2d array (one batch)
+           Will calculate everything but will not return anything. 
+           The forward pass should not be called by the user and will
+           only be called by other methods in this class. '''
+        self.__layers[0].forward(inputs)
+        self.__activations[0].forward(self.__layers[0].outputs)
 
-        for i in range(1, len(self.layers)):
-            if (i + 1 == len(self.layers)):
-                if (len(self.activations) == len(self.layers)):
-                    self.layers[i].forward(self.activations[i-1].outputs)
-                    self.activations[i].forward(self.layers[i].outputs)
+        for i in range(1, len(self.__layers)):
+            if (i + 1 == len(self.__layers)):
+                if (len(self.__activations) == len(self.__layers)):
+                    self.__layers[i].forward(self.__activations[i-1].outputs)
+                    self.__activations[i].forward(self.__layers[i].outputs)
 
-                    self.loss = self.loss_function.calculate(self.activations[i].outputs, targets)
+                    if (targets != None):
+                        self.loss = self.__loss_function.calculate(self.__activations[i].outputs, targets)
 
-                    predictions = np.argmax(self.activations[-1].outputs, axis=1)
-                    if len(targets.shape) == 2:
-                        targets = np.argmax(targets, axis=1)
-                    self.accuracy = np.mean(predictions == targets) 
+                        predictions = np.argmax(self.__activations[-1].outputs, axis=1)
+                        if len(targets.shape) == 2:
+                            targets = np.argmax(targets, axis=1)
+                        self.accuracy = np.mean(predictions == targets) 
                 else:
-                    self.layers[i].forward(self.activations[i-1].outputs)
-                    self.loss = self.loss_function.forward(self.layers[i].outputs, targets)
+                    self.__layers[i].forward(self.__activations[i-1].outputs)
 
-                    predictions = np.argmax(self.activations[-1].outputs, axis=1)
-                    if len(targets.shape) == 2:
-                        targets = np.argmax(targets, axis=1)
-                    self.accuracy = np.mean(predictions == targets)
+                    if(targets != None):
+                        self.loss = self.__loss_function.forward(self.__layers[i].outputs, targets)
+
+                        predictions = np.argmax(self.__activations[-1].outputs, axis=1)
+                        if len(targets.shape) == 2:
+                            targets = np.argmax(targets, axis=1)
+                        self.accuracy = np.mean(predictions == targets)
             else:
 
-                self.layers[i].forward(self.activations[i-1].outputs)
-                self.activations[i].forward(self.layers[i].outputs)
+                self.__layers[i].forward(self.__activations[i-1].outputs)
+                self.__activations[i].forward(self.__layers[i].outputs)
     
-    def backward(self, labels):
-        self.loss_function.backward(self.loss_fuction.outputs, labels)
+    def __backward(self, labels):
+        self.__loss_function.backward(self.loss_fuction.outputs, labels)
 
-        if isinstance(self.loss_function, Softmax_Entropy):
-            self.layers[-1].backward(self.loss_function.dinputs)
+        if isinstance(self.__loss_function, Softmax_Entropy):
+            self.__layers[-1].backward(self.__loss_function.dinputs)
 
-            for i in range(len(self.activations) - 1, -1 , -1):
-                self.activations[i].backward(self.layers[i+1].dinputs)
-                self.layers[i].backward(self.activations[i].dinputs)
+            for i in range(len(self.__activations) - 1, -1 , -1):
+                self.__activations[i].backward(self.__layers[i+1].dinputs)
+                self.__layers[i].backward(self.__activations[i].dinputs)
 
         else:
-            self.activations[-1].backward(self.loss_function.dinputs)
-            self.layers[-1].backward(self.activations[-1].dinputs)
+            self.__activations[-1].backward(self.__loss_function.dinputs)
+            self.__layers[-1].backward(self.__activations[-1].dinputs)
 
-            for i in range(len(self.layers) - 2, -1, -1):
-                self.activations[i].backward(self.layers[i + 1].dinputs)
-                self.layers[i].backward(self.activations[i].dinputs)
+            for i in range(len(self.__layers) - 2, -1, -1):
+                self.__activations[i].backward(self.__layers[i + 1].dinputs)
+                self.__layers[i].backward(self.__activations[i].dinputs)
 
-        self.optimizer.pre_param_updates()
-        for layer in self.layers:
-            self.optimizer.update_params(layer)
-        self.optimizer.post_param_updates()
+        self.__optimizer.pre_param_updates()
+        for layer in self.__layers:
+            self.__optimizer.update_params(layer)
+        self.__optimizer.post_param_updates()
     
     def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None):
         pass 
 
     def predict(self, X, y = None) -> np.ndarray:
-        self.forward(X, y)
-        return self.activations[-1].outputs
+        self.__forward(X, y)
+
+        if (isinstance(self.__loss_function, Softmax_Entropy)):
+            return self.__loss_function.outputs
+        else:
+            return self.__activations[-1].outputs
 
     def save_model(self):
         choice = input("Would you like to save the model? [y/n] -> ")
@@ -332,9 +343,9 @@ class Model:
         weights = np.array()
         biases = np.array()
 
-        for i in range(len(self.layers)):
-            weights.append(self.layers[i].weights)
-            biases.append(self.layers[i].bias)
+        for i in range(len(self.__layers)):
+            weights.append(self.__layers[i].weights)
+            biases.append(self.__layers[i].bias)
 
         np.save(weights_name + ".npy", weights)
         np.save(biases_name + ".npy", biases)
@@ -352,5 +363,5 @@ class Model:
             layer.set_weight(weights[i])
             layer.set_bias(biases[i])
 
-            self.layers.append(layer )
+            self.__layers.append(layer)
 
