@@ -315,11 +315,12 @@ class Model:
             self.optimizer.update_params(layer)
         self.optimizer.post_param_updates()
     
-    def train(X_train = None, X_valid = None, y_train = None, y_valid = None):
+    def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None):
         pass 
 
-    def predict(X, y = None):
-        pass
+    def predict(self, X, y = None) -> np.ndarray:
+        self.forward(X, y)
+        return self.activations[-1].outputs
 
     def save_model(self):
         choice = input("Would you like to save the model? [y/n] -> ")
