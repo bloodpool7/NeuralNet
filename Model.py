@@ -346,8 +346,8 @@ class Model:
         biases = []
 
         for i in range(len(self.__layers)):
-            weights.append(self.__layers[i].weights)
-            biases.append(self.__layers[i].bias)
+            weights.append(self.__layers[i].weights.toList())
+            biases.append(self.__layers[i].bias.tolist())
 
         np.save(weights_name + ".npy", np.array(weights, dtype = object), allow_pickle = True)
         np.save(biases_name + ".npy", np.array(biases, dtype = object), allow_pickle = True)
@@ -360,12 +360,21 @@ class Model:
         biases = np.load(biases_name, allow_pickle = True)
 
         for arr in weights:
+            layer_weights = []
+            for lists in arr:
+                layer_weights.append(np.array(lists))
+            layer_weights = np.array(layer_weights)
 
-            layer = Layer(len(arr), len(arr[0]))
+            layer = Layer(len(layer_weights), len(layer_weights[0]))
             layer.set_weight(arr)
 
             self.__layers.append(layer)
         
         for arr in biases:
+            layer_biases = []
+            for lists in arr:
+                layer_biases.append(np.array(lists))
+            layer_biases = np.array(layer_biases)
+            
             layer.set_bias(arr)
 
