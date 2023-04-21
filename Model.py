@@ -9,10 +9,12 @@ class Layer:
     #setting the weights
     def set_weight(self, weight_in):
         self.weights = np.array(weight_in)
+        print(self.weights)
 
     #setting the biases
     def set_bias(self, bias_in):
         self.bias = np.array(bias_in)
+        print(self.bias)
 
     #the forward pass of a layer (dot product basically)
     def forward(self, inputs):
@@ -340,8 +342,8 @@ class Model:
         weights_name = input("Enter the file name for the weights without the file extension -> ")
         biases_name = input("Enter the file name for the biases without the file extension -> ")
 
-        weights = np.array()
-        biases = np.array()
+        weights = []
+        biases = []
 
         for i in range(len(self.__layers)):
             weights.append(self.__layers[i].weights)
@@ -355,7 +357,7 @@ class Model:
         biases_name = input("Enter the file name for the biases -> ")
 
         weights = np.load(weights_name, allow_pickle = True)
-        biases = np.load(biases_name)
+        biases = np.load(biases_name, allow_pickle = True)
 
         for i in range(len(weights)):
 

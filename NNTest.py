@@ -9,46 +9,23 @@ import time
 
 # Using Model Object
 
-weights = [[[3, 2, 1],
-           [2, 3, 1],
-           [3, 5, -3]],
-           [[3, 2, 1],
-           [2, 3, 1],
-           [3, 5, -3]],
-           [[3, 2],
-           [2, 3],
-           [3, -2]]]
-
-bias = np.array([[[0, 0, 0]],
-        [[0, 0, 0]],
-        [[0, 0, 0]]])
-
-
-
-
 model = Model(
+    # layers = [Layer(3, 3), Layer(3, 3), Layer(3, 2)],
     activations = [ReLU(), ReLU(), Softmax()],
     loss = Mean_Squared_Error(),
     optimizer = SGD(learning_rate = 0.1)
 )
 
+model.load_model()
 
-# inputs = np.array([[1, 2, 3]])
+inputs = np.array([[1, 2, 3]])
 
-# targets = np.array([0])
+targets = np.array([0])
 
-# print(model.predict(inputs, targets))
-# print(model.loss)
+print(model.predict(inputs, targets))
+print(model.loss)
 
 #Without Model Object (control)
-
-
-
-
-
-
-
-
 
 
 # X, y = mnist_load_data()
