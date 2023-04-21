@@ -349,8 +349,8 @@ class Model:
             weights.append(self.__layers[i].weights)
             biases.append(self.__layers[i].bias)
 
-        np.save(weights_name + ".npy", weights)
-        np.save(biases_name + ".npy", biases)
+        np.save(weights_name + ".npy", np.array(weights, dtype = object), allow_pickle = True)
+        np.save(biases_name + ".npy", np.array(biases, dtype = object), allow_pickle = True)
 
     def load_model(self):
         weights_name = input("Enter the file name for the weights -> ")
@@ -359,11 +359,13 @@ class Model:
         weights = np.load(weights_name, allow_pickle = True)
         biases = np.load(biases_name, allow_pickle = True)
 
-        for i in range(len(weights)):
+        for arr in weights:
 
-            layer = Layer(len(weights[i]), len(weights[i][0]))
-            layer.set_weight(weights[i])
-            layer.set_bias(biases[i])
+            layer = Layer(len(arr), len(arr[0]))
+            layer.set_weight(arr)
 
             self.__layers.append(layer)
+        
+        for arr in biases:
+            layer.set_bias(arr)
 
