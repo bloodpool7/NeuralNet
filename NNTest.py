@@ -22,38 +22,41 @@ l3bias = np.array([[3, -2]]).tolist()
 weights = [l1weights, l2weights, l3weights]
 biases = [l1bias, l2bias, l3bias]
 
-# Using Model Object
-
-model = Model(
-    #layers = [l1, l2, l3],
-    activations = [ReLU(), ReLU(), Softmax()],
-    loss = Mean_Squared_Error(),
-    optimizer = SGD(learning_rate = 0.1)
-)
-
-model.save_model()
-
-# model.load_model()
-
 inputs = np.array([[1, 2, 3]])
 
 targets = np.array([0])
 
-print(model.predict(inputs, targets))
-print(model.loss)
+# Using Model Object
 
-model = Model(
-    activations = [ReLU(), ReLU(), Softmax()],
-    loss = Mean_Squared_Error(),
-    optimizer = SGD(learning_rate = 0.1)
-)
+# model = Model(
+#     #layers = [l1, l2, l3],
+#     activations = [ReLU(), ReLU(), Softmax()],
+#     loss = Mean_Squared_Error(),
+#     optimizer = SGD(learning_rate = 0.1)
+# )
 
-model.load_model()
+# model.save_model()
 
-print(model.predict(inputs, targets))
-print(model.loss)
+# model.load_model()
+
+# print(model.predict(inputs, targets))
+# print(model.loss)
+
+# model = Model(
+#     activations = [ReLU(), ReLU(), Softmax()],
+#     loss = Mean_Squared_Error(),
+#     optimizer = SGD(learning_rate = 0.1)
+# )
+
+# model.load_model()
+
+# print(model.predict(inputs, targets))
+# print(model.loss)
 
 #Without Model Object (control)
+
+
+
 
 
 # X, y = mnist_load_data()
