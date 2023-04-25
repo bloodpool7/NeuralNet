@@ -383,4 +383,3 @@ class Model:
             layer_biases = np.array(layer_biases)
             
             layer.set_bias(layer_biases)
-
