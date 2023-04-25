@@ -328,7 +328,16 @@ class Model:
     
     def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None, epochs = None):
         if (len(X_train.shape) == 3):
-            pass
+            for epoch in range(epochs):
+                for batch in range(len(X_train)):
+                    self.__forward(X_train[batch], y_train[batch])
+                    self.__backward(y_train[batch])
+        elif (len(X_train.shape) == 2):
+            for epoch in range(epochs):
+                self.__forward(X_train, y_train)
+                self.__backward(y_train)
+
+        self.__forward(X_valid, y_valid)
 
     def predict(self, X, y = None) -> np.ndarray:
         self.__forward(X, y)
