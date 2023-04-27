@@ -325,7 +325,7 @@ class Model:
             self.__optimizer.update_params(layer)
         self.__optimizer.post_param_updates()
 
-    
+    #Trains the model 
     def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None, epochs = None):
         if (len(X_train.shape) == 3):
             for epoch in range(epochs):
