@@ -78,16 +78,10 @@ model = Model(
     optimizer = optimizer
 )
 
-data, labels = mnist_load_data()
+X_train, y_train = mnist_load_data()
 
-print(data.shape)
-print(labels.shape)
+X_train, y_train = shuffle_data(X_train, X_train, batch_size = 128)
 
-X_train, y_train = shuffle_data(data, labels, batch_size = 64)
 
 X_valid, y_valid = mnist_load_test()
-
-print(X_valid.shape)
-print(y_valid.shape)
-
 
