@@ -80,9 +80,8 @@ model = Model(
 
 X_train, y_train = mnist_load_data()
 
-X_train, y_train = shuffle_data(X_train, X_train, batch_size = 128)
-
-print(len(X_train[0].shape))
+X_train, y_train = shuffle_data(X_train, y_train, batch_size = 128)
 
 X_valid, y_valid = mnist_load_test()
 
+model.train(X_train, y_train, X_valid, y_valid, epochs = 10)

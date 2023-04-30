@@ -280,7 +280,7 @@ class Model:
                     self.__layers[i].forward(self.__activations[i-1].outputs)
                     self.__activations[i].forward(self.__layers[i].outputs)
 
-                    if (targets != None):
+                    if (targets is not None):
                         self.loss = self.__loss_function.calculate(self.__activations[i].outputs, targets)
 
                         predictions = np.argmax(self.__activations[-1].outputs, axis=1)
