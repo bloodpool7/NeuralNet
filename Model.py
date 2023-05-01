@@ -304,7 +304,7 @@ class Model:
     def __backward(self, labels):
         
         if isinstance(self.__loss_function, Softmax_Entropy):
-            self.__loss_function.backward(self.loss_fuction.outputs, labels)
+            self.__loss_function.backward(self.__loss_function.outputs, labels)
             self.__layers[-1].backward(self.__loss_function.dinputs)
 
             for i in range(len(self.__activations) - 1, -1 , -1):
