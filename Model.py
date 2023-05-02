@@ -260,6 +260,7 @@ class Model:
         self.__activations = activations if activations != None else []
         self.__optimizer = optimizer
         self.__loss_function = loss
+        self.loss = None
 
         if (activations != None and isinstance(self.__activations[-1], Softmax) and isinstance(self.__loss_function, CategoricalCrossEntroy)):
             self.__activations.pop()
@@ -297,9 +298,9 @@ class Model:
                             targets = np.argmax(targets, axis=1)
                         self.accuracy = np.mean(predictions == targets)
             else:
-
                 self.__layers[i].forward(self.__activations[i-1].outputs)
                 self.__activations[i].forward(self.__layers[i].outputs)
+
     
     def __backward(self, labels):
         
@@ -338,6 +339,23 @@ class Model:
                 self.__backward(y_train)
 
         self.__forward(X_valid, y_valid)
+
+        if(isinstance(self.__loss_function, Softmax_Entropy)):
+            predictions = np.argmax(self.__loss_function.outputs, axis=1)
+            if len(y_valid.shape) == 2:
+                y_valid = np.argmax(y, axis=1) 
+            accuracy = np.mean(predictions==y_valid)
+
+            print(f'acc: {accuracy:.3f}, ' + 
+                f'loss: {self.loss:.3f}, ')
+        else:
+            predictions = np.argmax(self.__activations[-1].outputs, axis=1)
+            if len(y_valid.shape) == 2:
+                y_valid = np.argmax(y, axis=1) 
+            accuracy = np.mean(predictions==y_valid)
+
+            print(f'acc: {accuracy:.3f}, ' + 
+                f'loss: {self.loss:.3f}, ')
 
     def predict(self, X, y = None) -> np.ndarray:
         self.__forward(X, y)
