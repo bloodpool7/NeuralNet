@@ -59,9 +59,9 @@ import time
 
 #Testing the train function in Model
 
-l1 = Layer(784, 128)
-l2 = Layer(128, 64)
-l3 = Layer(64, 10)
+l1 = Layer(784, 300)
+l2 = Layer(300, 300)
+l3 = Layer(300, 10)
 
 a1 = ReLU()
 a2 = ReLU()
@@ -84,4 +84,4 @@ X_train, y_train = shuffle_data(X_train, y_train, batch_size = 128)
 
 X_valid, y_valid = mnist_load_test()
 
-model.train(X_train, y_train, X_valid, y_valid, epochs = 10)
+model.train(X_train, y_train, X_valid, y_valid, epochs = 25)

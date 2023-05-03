@@ -281,7 +281,7 @@ class Model:
                     self.__activations[i].forward(self.__layers[i].outputs)
 
                     if (targets is not None):
-                        self.loss = self.__loss_function.calculate(self.__activations[i].outputs, targets)
+                        self.loss = self.__loss_function.calculate(self.__activations[-1].outputs, targets)
 
                         predictions = np.argmax(self.__activations[-1].outputs, axis=1)
                         if len(targets.shape) == 2:
@@ -290,7 +290,7 @@ class Model:
                 else:
                     self.__layers[i].forward(self.__activations[i-1].outputs)
 
-                    if(targets != None):
+                    if(targets is not None):
                         self.loss = self.__loss_function.forward(self.__layers[i].outputs, targets)
 
                         predictions = np.argmax(self.__activations[-1].outputs, axis=1)
@@ -327,7 +327,7 @@ class Model:
         self.__optimizer.post_param_updates()
 
     #Trains the model 
-    def train(self, X_train = None, X_valid = None, y_train = None, y_valid = None, epochs = None):
+    def train(self, X_train = None, y_train = None, X_valid = None, y_valid = None, epochs = None):
         if (len(X_train[0].shape) == 2):
             for epoch in range(epochs):
                 for batch in range(len(X_train)):
