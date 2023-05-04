@@ -72,16 +72,12 @@ loss = CategoricalCrossEntroy()
 optimizer = Adam()
 
 model = Model(
-    layers = [l1, l2, l3],
     activations = [a1, a2, a3],
     loss = loss,
     optimizer = optimizer
 )
 
-X_train, y_train = mnist_load_data()
-
-X_train, y_train = shuffle_data(X_train, y_train, batch_size = 128)
 
 X_valid, y_valid = mnist_load_test()
 
-model.train(X_train, y_train, X_valid, y_valid, epochs = 25)
+model.load_model("weights.npy", "biases.npy")
