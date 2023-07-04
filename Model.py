@@ -1,4 +1,9 @@
 import numpy as np
+from scipy import signal
+
+#############################################################################################################
+############################################## LAYER TYPES ##################################################
+#############################################################################################################
 
 class Layer:
     #parameters are the number of neurons by the number of features
@@ -26,6 +31,107 @@ class Layer:
         self.dweights = np.dot(self.inputs.T, derivatives)
         self.dinputs = np.dot(derivatives, self.weights.T)
         self.dbias = np.sum(derivatives, axis = 0, keepdims = True)
+
+class Layer_Convolutional:
+    def __init__(self, depth = 3, filter_size = 2, num_filters = 1, stride = 1):
+        self.filter_size = filter_size
+        self.depth = depth
+        self.num_filters = num_filters
+        self.stride = stride
+
+        self.kernels = 0.5 * np.random.randn(num_filters, depth, filter_size, filter_size)
+        self.bias = np.zeros((num_filters))
+    
+    def set_kernels(self, kernels):
+        self.kernels = np.array(kernels)
+        self.kernels = self.kernels.astype(np.float64)
+
+    def set_bias(self, bias):
+        self.bias = np.array(bias)
+        self.bias = self.bias.astype(np.float64)
+
+    def forward(self, inputs):
+        self.inputs = inputs
+        self.outputs = np.zeros(
+                inputs.shape[0], 
+                self.num_filters, 
+                int((inputs.shape[2] - self.filter_size)/self.stride + 1), 
+                int((inputs.shape[3] - self.filter_size)/self.stride + 1))
+        batch_size = self.inputs.shape[0]
+
+        if (len(self.inputs.shape) != 4):
+            raise ValueError(f"Input must be 4d array, cannot accept {len(self.inputs.shape)}d array")
+        
+        for i in range(batch_size):
+            for j in range(self.num_filters):
+                for k in range(self.depth):
+                    self.outputs[i, j] += signal.correlate2d(self.inputs[i, k], self.kernels[j, k], mode = "valid")
+                self.outputs[i, j] += self.bias[j]
+
+    
+    def backward(self, derivatives):
+        self.dkernels = np.zeros_like(self.kernels)
+        self.dbias = np.zeros_like(self.bias)
+        self.dinputs = np.zeros_like(self.inputs)
+
+        batch_size = self.inputs.shape[0]
+        for i in range(batch_size):
+            for j in range(self.num_filters):
+                for k in range(self.depth):
+                    self.dkernels[j, k] += signal.correlate2d(self.inputs[i, k], derivatives[i, j], mode = "valid")
+                    self.dinputs[i, k] += signal.convolve2d(derivatives[i, j], self.kernels[j, k], mode = "full")
+                self.dbias[j] += np.sum(derivatives[i, j])
+                    
+
+class Max_Pooling:
+    def __init__(self, filter_size = 2, stride = 2):
+        self.filter_size = filter_size
+        self.stride = stride
+    
+    def forward(self, inputs):
+        self.inputs = inputs
+
+        self.output_shape = (inputs.shape[0], inputs.shape[1], 
+                        int((inputs.shape[2] - self.filter_size)/self.stride + 1), 
+                        int((inputs.shape[3] - self.filter_size )/self.stride + 1))
+
+        self.outputs = np.zeros(self.output_shape)
+        self.indices = []
+        
+        for i in range(self.output_shape[0]):
+            for j in range(self.output_shape[1]):
+                for k in range(self.output_shape[2]):
+                    for l in range(self.output_shape[3]):
+                        temp = self.inputs[i, j, k*self.stride:k*self.stride+self.filter_size, l*self.stride:l*self.stride+self.filter_size]
+                        self.indices.append((i, j, *tuple(np.unravel_index(np.argmax(temp), temp.shape) * np.array([k * self.stride + 1, l*self.stride + 1]))))
+                        self.outputs[i, j, k, l] = self.inputs[self.indices[-1]]
+                       
+
+    def backward(self, derivatives):
+        self.dinputs = np.zeros(self.inputs.shape)
+        
+        for i in range(len(self.indices)):
+            self.dinputs[self.indices[i]] = derivatives[np.unravel_index(i, self.output_shape)]
+        
+
+
+class Flatten:
+    def __init__(self, input_shape, output_shape):
+        self.input_shape = input_shape
+        self.output_shape = output_shape
+    
+    def forward(self, inputs):
+        self.inputs = inputs
+
+        self.outputs = np.reshape(inputs, self.input_shape[0], self.output_shape)
+    
+    def backward(self, derivatives):
+        self.dinputs = np.reshape(derivatives, self.output_shape[0], self.input_shape)
+
+
+#############################################################################################################
+############################################### ACTIVATIONS #################################################
+#############################################################################################################
 
 #The relu activation function
 class ReLU:
@@ -65,6 +171,9 @@ class Softmax:
             
             self.dinputs[i] = np.dot(jacobian, single_dvalue)
 
+#############################################################################################################
+############################################## LOSS CLASSES #################################################
+#############################################################################################################
 #A common loss class 
 class Loss:
     #calculates the given loss function and returns its average
@@ -156,6 +265,10 @@ class Softmax_Entropy:
 
         #normalize gradient
         self.dinputs /= samples
+
+#############################################################################################################
+############################################### OPTIMIZERS ##################################################
+#############################################################################################################
 
 #an interface for all optimizers
 class Optimizer:
@@ -253,7 +366,10 @@ class Adam(Optimizer):
     def post_param_updates(self):
         self.iterations += 1
 
-# A model object
+#############################################################################################################
+################################################# MODEL #####################################################
+#############################################################################################################
+
 class Model:
     def __init__(self, layers: list = None, activations: list = None, loss = None, optimizer: Optimizer = None):
         self.__layers = layers if layers != None else []
