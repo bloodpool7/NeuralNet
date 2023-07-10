@@ -32,19 +32,19 @@ class Layer:
         self.dinputs = np.dot(derivatives, self.weights.T)
         self.dbias = np.sum(derivatives, axis = 0, keepdims = True)
 
-class Layer_Convolutional:
+class Layer_Conv:
     def __init__(self, depth = 3, filter_size = 2, num_filters = 1, stride = 1):
         self.filter_size = filter_size
         self.depth = depth
         self.num_filters = num_filters
         self.stride = stride
 
-        self.kernels = 0.5 * np.random.randn(num_filters, depth, filter_size, filter_size)
+        self.weights = 0.5 * np.random.randn(num_filters, depth, filter_size, filter_size)
         self.bias = np.zeros((num_filters))
     
-    def set_kernels(self, kernels):
-        self.kernels = np.array(kernels)
-        self.kernels = self.kernels.astype(np.float64)
+    def set_weight(self, weights):
+        self.weights = np.array(weights)
+        self.weights = self.weights.astype(np.float64)
 
     def set_bias(self, bias):
         self.bias = np.array(bias)
@@ -52,11 +52,11 @@ class Layer_Convolutional:
 
     def forward(self, inputs):
         self.inputs = inputs
-        self.outputs = np.zeros(
+        self.outputs = np.zeros( shape = (
                 inputs.shape[0], 
                 self.num_filters, 
                 int((inputs.shape[2] - self.filter_size)/self.stride + 1), 
-                int((inputs.shape[3] - self.filter_size)/self.stride + 1))
+                int((inputs.shape[3] - self.filter_size)/self.stride + 1)))
         batch_size = self.inputs.shape[0]
 
         if (len(self.inputs.shape) != 4):
@@ -65,21 +65,21 @@ class Layer_Convolutional:
         for i in range(batch_size):
             for j in range(self.num_filters):
                 for k in range(self.depth):
-                    self.outputs[i, j] += signal.correlate2d(self.inputs[i, k], self.kernels[j, k], mode = "valid")
+                    self.outputs[i, j] += signal.correlate2d(self.inputs[i, k], self.weights[j, k], mode = "valid")
                 self.outputs[i, j] += self.bias[j]
 
     
     def backward(self, derivatives):
-        self.dkernels = np.zeros_like(self.kernels)
+        self.dweights = np.zeros_like(self.weights)
         self.dbias = np.zeros_like(self.bias)
-        self.dinputs = np.zeros_like(self.inputs)
+        self.dinputs = np.zeros_like(self.inputs, dtype = np.float64)
 
         batch_size = self.inputs.shape[0]
         for i in range(batch_size):
             for j in range(self.num_filters):
                 for k in range(self.depth):
-                    self.dkernels[j, k] += signal.correlate2d(self.inputs[i, k], derivatives[i, j], mode = "valid")
-                    self.dinputs[i, k] += signal.convolve2d(derivatives[i, j], self.kernels[j, k], mode = "full")
+                    self.dweights[j, k] += signal.correlate2d(self.inputs[i, k], derivatives[i, j], mode = "valid")     
+                    self.dinputs[i, k] += signal.convolve2d(derivatives[i, j], self.weights[j, k], mode = "full")
                 self.dbias[j] += np.sum(derivatives[i, j])
                     
 
@@ -278,7 +278,7 @@ class Optimizer:
         pass
     
     #To be called to update each layer's weights and biases
-    def update_params(self, layer: Layer):
+    def update_params(self, layer):
         pass 
 
     #To be called after all layers' weights and biases have been updated
@@ -300,7 +300,7 @@ class SGD(Optimizer):
             self.current_learning_rate = self.learning_rate * (1 / (1 + self.decay * self.iterations))
 
     #the updating of params, adding momentum if needed
-    def update_params(self, layer: Layer):
+    def update_params(self, layer):
         if self.momentum:
             if not hasattr(layer, "weight_updates"):
                 layer.weight_updates = np.zeros_like(layer.weights)
@@ -336,7 +336,7 @@ class Adam(Optimizer):
         self.iterations = 0
 
     #To be called per layer
-    def update_params(self, layer: Layer):
+    def update_params(self, layer):
 
         #If this is the first iteration, create the necessary attributes for the layer
         if not hasattr(layer, "weight_moments"):
