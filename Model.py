@@ -116,17 +116,17 @@ class Max_Pooling:
 
 
 class Flatten:
-    def __init__(self, input_shape, output_shape):
-        self.input_shape = input_shape
+    def __init__(self, output_shape):
         self.output_shape = output_shape
     
     def forward(self, inputs):
         self.inputs = inputs
+        self.input_shape = self.inputs.shape
 
-        self.outputs = np.reshape(inputs, self.input_shape[0], self.output_shape)
+        self.outputs = np.reshape(inputs, self.output_shape)
     
     def backward(self, derivatives):
-        self.dinputs = np.reshape(derivatives, self.output_shape[0], self.input_shape)
+        self.dinputs = np.reshape(derivatives, self.input_shape)
 
 
 #############################################################################################################
