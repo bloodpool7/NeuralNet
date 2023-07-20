@@ -1,83 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Model import *
+from Model_GPU import *
 from ReadData import *
 import time
+import pandas as pd
 
-#weights & biases initialized the same for all layers for testing
-# l1weights = (0.5 * np.random.randn(3, 3)).tolist()
-# l2weights = (0.5 * np.random.randn(3, 3)).tolist()
-# l3weights = (0.5 * np.random.randn(3, 2)).tolist()
+data = pd.read_csv("Data/mnist_train.csv")
+inputs = data.iloc[:, 1:].to_numpy() / 255
+labels = data.iloc[:, 0].to_numpy() 
 
-# l1bias = np.array([[0, 0, 0]]).tolist()
-# l2bias = np.array([[0, 0, 0]]).tolist()
-# l3bias = np.array([[0, 0]]).tolist()
-
-# weights = [l1weights, l2weights, l3weights]
-# biases = [l1bias, l2bias, l3bias]
-
-# inputs = np.array([[1, 2, 3]])
-
-# targets = np.array([1])
-
-# validation_inputs = np.array([[1, 2, 3]])
-# valid_targets = np.array([1])
-
-# #model object will use these layers
-# l1 = Layer(3, 3)
-# l1.set_weight(l1weights)
-# l1.set_bias(l1bias)
-
-# l2 = Layer(3, 3)
-# l2.set_weight(l2weights)
-# l2.set_bias(l2bias)
-
-# l3 = Layer(3, 2)
-# l3.set_weight(l3weights)
-# l3.set_bias(l3bias)
-
-# a1 = ReLU()
-# a2 = ReLU()
-# a3 = Softmax()
-
-# loss = CategoricalCrossEntroy()
-
-# optimizer = Adam()
-
-# #non model object will use these layers
-# l1_copy = Layer(3, 3)
-# l1_copy.set_weight(l1weights)
-# l1_copy.set_bias(l1bias)
-
-# l2_copy = Layer(3, 3)
-# l2_copy.set_weight(l2weights)
-# l2_copy.set_bias(l2bias)
-
-# l3_copy = Layer(3, 2)
-# l3_copy.set_weight(l3weights)
-# l3_copy.set_bias(l3bias)
-
-#Testing the train function in Model
-
-l1 = Layer(784, 300)
-l2 = Layer(300, 300)
-l3 = Layer(300, 10)
-
+l1 = Layer(784, 256)
 a1 = ReLU()
-a2 = ReLU()
-a3 = Softmax()
+l2 = Layer(256, 10)
+a2 = Softmax_Entropy()
 
-loss = CategoricalCrossEntroy()
+inputs = np.array(np.array_split(inputs, 600))
+labels = np.array(np.array_split(labels, 600))
 
-optimizer = Adam()
+sections = [l1, a1, l2]
 
-model = Model(
-    activations = [a1, a2, a3],
-    loss = loss,
-    optimizer = optimizer
-)
+for i in range(inputs):
+    input_batch = cp.from_numpy(inputs[i])
+    label_batch = cp.from_numpy(labels[i])
 
+    previous = input_batch
+    for section in sections:
+        section.forward(previous)
+        previous = section.outputs
 
-X_valid, y_valid = mnist_load_test()
+    loss = a2.forward(previous, label_batch)
+    a2.backward(a2.outputs, label_batch)
 
-model.load_model("weights.npy", "biases.npy")
+    previous = a2.dinputs
+    for section in reversed(sections):
+        section.backward(previous)
+        previous = section.dinputs
+    
+    

@@ -116,14 +116,11 @@ class Max_Pooling:
 
 
 class Flatten:
-    def __init__(self, output_shape):
-        self.output_shape = output_shape
-    
     def forward(self, inputs):
         self.inputs = inputs
         self.input_shape = self.inputs.shape
 
-        self.outputs = np.reshape(inputs, self.output_shape)
+        self.outputs = np.reshape(inputs, (-1 , inputs.shape[1] * inputs.shape[2] * inputs.shape[3]))
     
     def backward(self, derivatives):
         self.dinputs = np.reshape(derivatives, self.input_shape)
@@ -248,7 +245,9 @@ class Softmax_Entropy:
 
         self.outputs = self.activation.outputs
 
-        return self.loss_function.calculate(self.outputs, y_true)
+        self.loss = self.loss_function.calculate(self.outputs, y_true)
+
+        return self.loss
     
     #backward pass, derivative simplifies to ytrue - ypred
     def backward(self, outputs, labels):
