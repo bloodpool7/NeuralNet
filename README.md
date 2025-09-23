@@ -1,2 +1,2 @@
 # NeuralNet
-My own implementation of a Convolutional Neural Network from scratch. Trained using MNIST Handwritten data and Iris Flower dataset
+Expansive Machine Learning Library implementing everything from optimizers to convolutional layers from scratch.
